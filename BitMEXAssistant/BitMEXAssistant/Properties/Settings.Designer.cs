@@ -742,5 +742,110 @@ namespace BitMEXAssistant.Properties {
                 this["XBTUSDReferencePrice"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool LimitNowStopLossBuy {
+            get
+            {
+                return ((bool)(this["LimitNowStopLossBuy"]));
+            }
+            set
+            {
+                this["LimitNowStopLossBuy"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("false")]
+        public bool LimitNowOrderBookSell
+        {
+            get
+            {
+                return ((bool)(this["LimitNowOrderBookSell"]));
+            }
+            set
+            {
+                this["LimitNowOrderBookSell"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("false")]
+        public bool LimitNowOrderBookBuy
+        {
+            get
+            {
+                return ((bool)(this["LimitNowOrderBookBuy"]));
+            }
+            set
+            {
+                this["LimitNowOrderBookBuy"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool LimitNowStopLossSell
+        {
+            get
+            {
+                return ((bool)(this["LimitNowStopLossSell"]));
+            }
+            set
+            {
+                this["LimitNowStopLossSell"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public decimal LimitNowStopLossBuyDelta
+        {
+            get
+            {
+                return ((decimal)(this["LimitNowStopLossBuyDelta"]));
+            }
+            set
+            {
+                this["LimitNowStopLossBuyDelta"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public decimal LimitNowStopLossSellDelta
+        {
+            get
+            {
+                return ((decimal)(this["LimitNowStopLossSellDelta"]));
+            }
+            set
+            {
+                this["LimitNowStopLossSellDelta"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int TabSelection
+        {
+            get
+            {
+                return ((int)(this["TabSelection"]));
+            }
+            set
+            {
+                this["TabSelection"] = value;
+            }
+        }
     }
+
 }

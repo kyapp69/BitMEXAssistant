@@ -216,7 +216,7 @@ namespace BitMEX
 
 
         #region Ordering
-        public string MarketOrder(string Symbol, string Side, int Quantity, bool ReduceOnly = false)
+        public List<Order> MarketOrder(string Symbol, string Side, int Quantity, bool ReduceOnly = false)
         {
             var param = new Dictionary<string, string>();
             param["symbol"] = Symbol;
@@ -242,10 +242,20 @@ namespace BitMEX
                     break;
                 }
             }
-            return res;
+            try
+            {
+                List<Order> Result = new List<Order>();
+                Result.Add(JsonConvert.DeserializeObject<Order>(res));
+                return Result;
+            }
+            catch (Exception ex)
+            {
+                return new List<Order>();
+            }
+            //return res;
         }
 
-        public string LimitOrder(string Symbol, string Side, int Quantity, decimal Price, bool ReduceOnly = false, bool PostOnly = false, bool Hidden = false)
+        public List<Order> LimitOrder(string Symbol, string Side, int Quantity, decimal Price, bool ReduceOnly = false, bool PostOnly = false, bool Hidden = false)
         {
             var param = new Dictionary<string, string>();
             param["symbol"] = Symbol;
@@ -270,6 +280,7 @@ namespace BitMEX
                 param["displayQty"] = "0";
             }
 
+            param["clOrdID"] = Guid.NewGuid().ToString();
 
             string res = Query("POST", "/order", param, true);
             int RetryAttemptCount = 0;
@@ -286,7 +297,170 @@ namespace BitMEX
                     break;
                 }
             }
-            return res;
+            try
+            {
+                List<Order> Result = new List<Order>();
+                Result.Add(JsonConvert.DeserializeObject<Order>(res));
+                return Result;
+            }
+            catch (Exception ex)
+            {
+                return new List<Order>();
+            }
+            //return res;
+        }
+
+        public List<Order> LimitOrderSafety(string Symbol, string Side, int Quantity, decimal Price, bool ReduceOnly = false, bool PostOnly = false, bool Hidden = false)
+        {
+#if TRUE
+            Order limitOrder = new Order();
+            limitOrder.Symbol = Symbol;
+            limitOrder.Side = Side;
+            limitOrder.OrderQty = Quantity;
+            limitOrder.OrdType = "Limit";
+            limitOrder.Price = Price;
+            if (ReduceOnly && !PostOnly)
+            {
+                limitOrder.ExecInst = "ReduceOnly";
+            }
+            else if (!ReduceOnly && PostOnly)
+            {
+                limitOrder.ExecInst = "ParticipateDoNotInitiate";
+            }
+            else if (ReduceOnly && PostOnly)
+            {
+                limitOrder.ExecInst = "ReduceOnly,ParticipateDoNotInitiate";
+            }
+            if (Hidden)
+            {
+                limitOrder.ExecInst = "0";
+            }
+            limitOrder.ContingencyType = "OneTriggersTheOther";
+
+
+            //limitOrder.ClOrdID = Guid.NewGuid().ToString();
+            limitOrder.ClOrdLinkID = Guid.NewGuid().ToString();
+            //string order = JsonConvert.SerializeObject(limitOrder);
+            // now we create the OTO order
+            Order OTOOrder = new Order();
+            OTOOrder.Symbol = Symbol;
+            OTOOrder.Price = Price;
+            if (Side == "Buy")
+            {
+                OTOOrder.Side = "Sell";
+                //OTOOrder.Price -= 5;
+            }
+            else
+            {
+                OTOOrder.Side = "Buy";
+                //OTOOrder.Price += 5;
+            }
+            OTOOrder.OrderQty = Quantity;
+            OTOOrder.OrdType = "Limit";
+            if (ReduceOnly && !PostOnly)
+            {
+                OTOOrder.ExecInst = "ReduceOnly";
+            }
+            else if (!ReduceOnly && PostOnly)
+            {
+                OTOOrder.ExecInst = "ParticipateDoNotInitiate";
+            }
+            else if (ReduceOnly && PostOnly)
+            {
+                OTOOrder.ExecInst = "ReduceOnly,ParticipateDoNotInitiate";
+            }
+            if (Hidden)
+            {
+                OTOOrder.ExecInst = "0";
+            }
+            //OTOOrder.ClOrdID = Guid.NewGuid().ToString();
+            OTOOrder.ClOrdLinkID = limitOrder.ClOrdLinkID;
+            // do a close order
+            /*
+            OTOOrder.OrdType = "StopLimit";
+            OTOOrder.StopPx = OTOOrder.Price; // this is the trigger price
+            OTOOrder.ExecInst = "Close";
+            */
+            Console.WriteLine("Adding Orders");
+
+            List<Order> orders = new List<Order>();
+            orders.Add(limitOrder);
+            orders.Add(OTOOrder);
+            Console.WriteLine("Serializing the list of orders");
+            string orderlist = JsonConvert.SerializeObject(orders);
+            Console.WriteLine(orderlist);
+            Console.WriteLine("Doing bulk");
+            string res = BulkOrder(orderlist);
+            Console.WriteLine("Bulk submitted");
+            Console.WriteLine(res);
+            try
+            {
+                List<Order> Result = new List<Order>();
+                Console.WriteLine("Deserial Bulk submit result");
+                Result = (JsonConvert.DeserializeObject<List<Order>>(res));
+                Console.WriteLine("Bulk submit result done deserialing");
+
+                return Result;
+            }
+            catch (Exception ex)
+            {
+                return new List<Order>();
+            }
+#else
+            var param = new Dictionary<string, string>();
+            param["symbol"] = Symbol;
+            param["side"] = Side;
+            param["orderQty"] = Quantity.ToString();
+            param["ordType"] = "Limit";
+            param["price"] = Price.ToString().Replace(",", ".");
+            if (ReduceOnly && !PostOnly)
+            {
+                param["execInst"] = "ReduceOnly";
+            }
+            else if (!ReduceOnly && PostOnly)
+            {
+                param["execInst"] = "ParticipateDoNotInitiate";
+            }
+            else if (ReduceOnly && PostOnly)
+            {
+                param["execInst"] = "ReduceOnly,ParticipateDoNotInitiate";
+            }
+            if (Hidden)
+            {
+                param["displayQty"] = "0";
+            }
+
+            param["clOrdID"] = Guid.NewGuid().ToString();
+            string res = Query("POST", "/order", param, true);
+            int RetryAttemptCount = 0;
+            int MaxRetries = RetryAttempts(res);
+            while (res.Contains("error") && RetryAttemptCount < MaxRetries)
+            {
+                errors.Add(res);
+                Thread.Sleep(BitMEXAssistant.Properties.Settings.Default.RetryAttemptWaitTime); // Force app to wait 500ms
+                res = Query("POST", "/order", param, true);
+                RetryAttemptCount++;
+                if (RetryAttemptCount == MaxRetries)
+                {
+                    errors.Add("Max rety attempts of " + MaxRetries.ToString() + " reached.");
+                    break;
+                }
+            }
+            
+            try
+            {
+                List<Order> Result = new List<Order>();
+                Result.Add(JsonConvert.DeserializeObject<Order>(res));
+                return Result;
+            }
+            catch (Exception ex)
+            {
+                return new List<Order>();
+            }
+            //return res;
+#endif
+
+            return new List<Order>();
         }
 
         public List<Order> LimitNowOrder(string Symbol, string Side, int Quantity, decimal Price, bool ReduceOnly = false, bool PostOnly = false, bool Hidden = false)
@@ -297,6 +471,149 @@ namespace BitMEX
             param["orderQty"] = Quantity.ToString();
             param["ordType"] = "Limit";
             param["price"] = Price.ToString().Replace(",",".");
+            if (ReduceOnly && !PostOnly)
+            {
+                param["execInst"] = "ReduceOnly";
+            }
+            else if (!ReduceOnly && PostOnly)
+            {
+                param["execInst"] = "ParticipateDoNotInitiate";
+            }
+            else if (ReduceOnly && PostOnly)
+            {
+                param["execInst"] = "ReduceOnly,ParticipateDoNotInitiate";
+            }
+            if (Hidden)
+            {
+                param["displayQty"] = "0";
+            }
+
+            string res = "";
+            try
+            {
+                Console.WriteLine("Doing query");
+                res = Query("POST", "/order", param, true);
+            }
+            catch (Exception ex)
+            {
+
+            }
+            int RetryAttemptCount = 0;
+            int MaxRetries = RetryAttempts(res);
+            while (res.Contains("error") && RetryAttemptCount < MaxRetries)
+            {
+                errors.Add(res);
+                Thread.Sleep(BitMEXAssistant.Properties.Settings.Default.RetryAttemptWaitTime); // Force app to wait 500ms
+                res = Query("POST", "/order", param, true);
+                RetryAttemptCount++;
+                if (RetryAttemptCount == MaxRetries)
+                {
+                    errors.Add("Max rety attempts of " + MaxRetries.ToString() + " reached.");
+                    break;
+                }
+            }
+
+            try
+            {
+                Console.WriteLine("Parsing result:"+res);
+                List<Order> Result = new List<Order>();
+                Result.Add(JsonConvert.DeserializeObject<Order>(res));
+                return Result;
+            }
+            catch (Exception ex)
+            {
+                return new List<Order>();
+            }
+        }
+
+        public List<Order> LimitNowOrderSafety(string Symbol, string Side, int Quantity, decimal Price, bool ReduceOnly = false, bool PostOnly = false, bool Hidden = false)
+        {
+#if TRUE
+            Console.WriteLine("LimitNowOrderSafety");
+            Order limitOrder = new Order();
+            limitOrder.Symbol = Symbol;
+            limitOrder.Side = Side;
+            limitOrder.OrderQty = Quantity;
+            limitOrder.OrdType = "Limit";
+            limitOrder.Price = Price;
+            if (ReduceOnly && !PostOnly)
+            {
+                limitOrder.ExecInst = "ReduceOnly";
+            }
+            else if (!ReduceOnly && PostOnly)
+            {
+                limitOrder.ExecInst = "ParticipateDoNotInitiate";
+            }
+            else if (ReduceOnly && PostOnly)
+            {
+                limitOrder.ExecInst = "ReduceOnly,ParticipateDoNotInitiate";
+            }
+            if (Hidden)
+            {
+                limitOrder.ExecInst = "0";
+            }
+            limitOrder.ContingencyType = "OneTriggersTheOther";
+
+            limitOrder.ClOrdLinkID = Guid.NewGuid().ToString();
+            //string order = JsonConvert.SerializeObject(limitOrder);
+            // now we create the OTO order
+            Order OTOOrder = new Order();
+            OTOOrder.Symbol = Symbol;
+            OTOOrder.Price = Price;
+            if (Side == "Buy")
+            {
+                OTOOrder.Side = "Sell";
+            }
+            else
+            {
+                OTOOrder.Side = "Buy";
+            }
+            OTOOrder.OrderQty = Quantity;
+            OTOOrder.OrdType = "Limit";
+            if (ReduceOnly && !PostOnly)
+            {
+                OTOOrder.ExecInst = "ReduceOnly";
+            }
+            else if (!ReduceOnly && PostOnly)
+            {
+                OTOOrder.ExecInst = "ParticipateDoNotInitiate";
+            }
+            else if (ReduceOnly && PostOnly)
+            {
+                OTOOrder.ExecInst = "ReduceOnly,ParticipateDoNotInitiate";
+            }
+            if (Hidden)
+            {
+                OTOOrder.ExecInst = "0";
+            }
+            //OTOOrder.ClOrdID = Guid.NewGuid().ToString();
+            OTOOrder.ClOrdLinkID = limitOrder.ClOrdLinkID;
+
+            List<Order> orders = new List<Order>();
+
+            orders.Add(limitOrder);
+            orders.Add(OTOOrder);
+
+            string orderlist = JsonConvert.SerializeObject(orders);
+            string res = BulkOrder(orderlist);
+            try
+            {
+                List<Order> Result = new List<Order>();
+                Result = (JsonConvert.DeserializeObject<List<Order>>(res));
+                return Result;
+            }
+            catch (Exception ex)
+            {
+                return new List<Order>();
+            }
+
+#else
+            var param = new Dictionary<string, string>();
+            param["symbol"] = Symbol;
+            param["side"] = Side;
+            param["orderQty"] = Quantity.ToString();
+            param["ordType"] = "Limit";
+            param["price"] = Price.ToString().Replace(",", ".");
             if (ReduceOnly && !PostOnly)
             {
                 param["execInst"] = "ReduceOnly";
@@ -341,6 +658,144 @@ namespace BitMEX
             {
                 return new List<Order>();
             }
+#endif
+            return new List<Order>();
+        }
+
+        public List<Order> LimitNowOrderBreakout(string Symbol, string Side, int Quantity, decimal Price, bool ReduceOnly = false, bool PostOnly = false, bool Hidden = false)
+        {
+#if TRUE
+            Console.WriteLine("LimitNowOrderSafety");
+            Order limitOrder = new Order();
+            limitOrder.Symbol = Symbol;
+            limitOrder.Side = Side;
+            limitOrder.OrderQty = Quantity;
+            limitOrder.OrdType = "Limit";
+            limitOrder.Price = Price;
+            if (ReduceOnly && !PostOnly)
+            {
+                limitOrder.ExecInst = "ReduceOnly";
+            }
+            else if (!ReduceOnly && PostOnly)
+            {
+                limitOrder.ExecInst = "ParticipateDoNotInitiate";
+            }
+            else if (ReduceOnly && PostOnly)
+            {
+                limitOrder.ExecInst = "ReduceOnly,ParticipateDoNotInitiate";
+            }
+            if (Hidden)
+            {
+                limitOrder.ExecInst = "0";
+            }
+            limitOrder.ContingencyType = "OneTriggersTheOther";
+
+            limitOrder.ClOrdLinkID = Guid.NewGuid().ToString();
+            //string order = JsonConvert.SerializeObject(limitOrder);
+            // now we create the OTO order
+            Order OTOOrder = new Order();
+            OTOOrder.Symbol = Symbol;
+            OTOOrder.Price = Price;
+            if (Side == "Buy")
+            {
+                OTOOrder.Side = "Sell";
+            }
+            else
+            {
+                OTOOrder.Side = "Buy";
+            }
+            OTOOrder.OrderQty = Quantity;
+            OTOOrder.OrdType = "Limit";
+            if (ReduceOnly && !PostOnly)
+            {
+                OTOOrder.ExecInst = "ReduceOnly";
+            }
+            else if (!ReduceOnly && PostOnly)
+            {
+                OTOOrder.ExecInst = "ParticipateDoNotInitiate";
+            }
+            else if (ReduceOnly && PostOnly)
+            {
+                OTOOrder.ExecInst = "ReduceOnly,ParticipateDoNotInitiate";
+            }
+            if (Hidden)
+            {
+                OTOOrder.ExecInst = "0";
+            }
+            //OTOOrder.ClOrdID = Guid.NewGuid().ToString();
+            OTOOrder.ClOrdLinkID = limitOrder.ClOrdLinkID;
+
+            List<Order> orders = new List<Order>();
+
+            orders.Add(limitOrder);
+            orders.Add(OTOOrder);
+
+            string orderlist = JsonConvert.SerializeObject(orders);
+            string res = BulkOrder(orderlist);
+            try
+            {
+                List<Order> Result = new List<Order>();
+                Result = (JsonConvert.DeserializeObject<List<Order>>(res));
+                return Result;
+            }
+            catch (Exception ex)
+            {
+                return new List<Order>();
+            }
+
+#else
+            var param = new Dictionary<string, string>();
+            param["symbol"] = Symbol;
+            param["side"] = Side;
+            param["orderQty"] = Quantity.ToString();
+            param["ordType"] = "Limit";
+            param["price"] = Price.ToString().Replace(",", ".");
+            if (ReduceOnly && !PostOnly)
+            {
+                param["execInst"] = "ReduceOnly";
+            }
+            else if (!ReduceOnly && PostOnly)
+            {
+                param["execInst"] = "ParticipateDoNotInitiate";
+            }
+            else if (ReduceOnly && PostOnly)
+            {
+                param["execInst"] = "ReduceOnly,ParticipateDoNotInitiate";
+            }
+            if (Hidden)
+            {
+                param["displayQty"] = "0";
+            }
+
+
+            string res = Query("POST", "/order", param, true);
+            int RetryAttemptCount = 0;
+            int MaxRetries = RetryAttempts(res);
+            while (res.Contains("error") && RetryAttemptCount < MaxRetries)
+            {
+                errors.Add(res);
+                Thread.Sleep(BitMEXAssistant.Properties.Settings.Default.RetryAttemptWaitTime); // Force app to wait 500ms
+                res = Query("POST", "/order", param, true);
+                RetryAttemptCount++;
+                if (RetryAttemptCount == MaxRetries)
+                {
+                    errors.Add("Max rety attempts of " + MaxRetries.ToString() + " reached.");
+                    break;
+                }
+            }
+
+            try
+            {
+                List<Order> Result = new List<Order>();
+                Result.Add(JsonConvert.DeserializeObject<Order>(res));
+                return Result;
+            }
+            catch (Exception ex)
+            {
+                return new List<Order>();
+            }
+#endif
+            return new List<Order>();
         }
 
         public List<Order> LimitNowAmendOrder(string OrderId, decimal? Price = null, int? OrderQty = null)
@@ -357,7 +812,7 @@ namespace BitMEX
             }
 
             string res = Query("PUT", "/order", param, true);
-
+            Console.WriteLine("Amended:" + res);
             try
             {
                 List<Order> Result = new List<Order>();
@@ -437,7 +892,7 @@ namespace BitMEX
             try
             {
                 List<Order> Result = new List<Order>();
-                Result.Add(JsonConvert.DeserializeObject<Order>(res));
+                Result = (JsonConvert.DeserializeObject<List<Order>>(res));
                 return Result;
             }
             catch (Exception ex)
@@ -499,7 +954,8 @@ namespace BitMEX
         {
             var param = new Dictionary<string, string>();
             param["orders"] = Orders;
-            string res = Query("POST", "/order/bulk", param, true);
+            string res;
+            res = Query("POST", "/order/bulk", param, true);
             int RetryAttemptCount = 0;
             int MaxRetries = RetryAttempts(res);
             while (res.Contains("error") && RetryAttemptCount < MaxRetries)
@@ -540,7 +996,7 @@ namespace BitMEX
         }
 
 
-        #endregion
+#endregion
 
 
         public List<Instrument> GetActiveInstruments()
@@ -598,7 +1054,6 @@ namespace BitMEX
                 return new List<Instrument>();
             }
         }
-
 
         public List<Position> GetOpenPositions(string symbol)
         {
@@ -731,7 +1186,7 @@ namespace BitMEX
 
         }
 
-        #endregion
+#endregion
 
 
         private int RetryAttempts(string res)
@@ -763,7 +1218,7 @@ namespace BitMEX
 
 
 
-        #region RateLimiter
+#region RateLimiter
 
         private long lastTicks = 0;
         private object thisLock = new object();
@@ -780,7 +1235,7 @@ namespace BitMEX
             }
         }
 
-        #endregion RateLimiter
+#endregion RateLimiter
     }
 
     // Working Classes
@@ -925,16 +1380,63 @@ namespace BitMEX
 
     public class Order
     {
+        [JsonProperty(PropertyName = "timeStamp")]
         public DateTime TimeStamp { get; set; }
+        [JsonProperty(PropertyName = "symbol")]
         public string Symbol { get; set; }
+        [JsonProperty(PropertyName = "ordStatus")]
         public string OrdStatus { get; set; }
+        [JsonProperty(PropertyName = "ordType")]
         public string OrdType { get; set; }
+        [JsonProperty(PropertyName = "orderID")]
         public string OrderId { get; set; }
+        [JsonProperty(PropertyName = "side")]
         public string Side { get; set; }
-        public double? Price { get; set; }
+        [JsonProperty(PropertyName = "price")]
+        public decimal? Price { get; set; }
+        [JsonProperty(PropertyName = "orderQty")]
         public int? OrderQty { get; set; }
+        [JsonProperty(PropertyName = "displayQty")]
         public int? DisplayQty { get; set; }
+        [JsonProperty(PropertyName = "execInst")]
         public string ExecInst { get; set; }
+        [JsonProperty(PropertyName = "clOrdID")]
+        public string ClOrdID { get; set; }
+        [JsonProperty(PropertyName = "clOrdLinkID")]
+        public string ClOrdLinkID { get; set; }
+        [JsonProperty(PropertyName = "contingencyType")]
+        public string ContingencyType { get; set; }
+        [JsonProperty(PropertyName = "stopPx")]
+        public decimal? StopPx { get; set; }
+        [JsonProperty(PropertyName = "pegOffsetVale")]
+        public decimal? PegOffsetValue { get; set; }
+        [JsonProperty(PropertyName = "pegPriceType")]
+        public string PegPriceType { get; set; }
+    }
+
+    public class OrderAmend
+    {
+        public OrderAmend(Order order)
+        {
+            OrderId = order.OrderId;
+            Price = order.Price;
+            OrderQty = order.OrderQty;
+            StopPx = order.StopPx;
+            PegOffsetValue = order.PegOffsetValue;
+            PegPriceType = order.PegPriceType;
+        }
+        [JsonProperty(PropertyName = "orderID")]
+        public string OrderId { get; set; }
+        [JsonProperty(PropertyName = "price")]
+        public decimal? Price { get; set; }
+        [JsonProperty(PropertyName = "orderQty")]
+        public int? OrderQty { get; set; }
+        [JsonProperty(PropertyName = "stopPx")]
+        public decimal? StopPx { get; set; }
+        [JsonProperty(PropertyName = "pegOffsetVale")]
+        public decimal? PegOffsetValue { get; set; }
+        [JsonProperty(PropertyName = "pegPriceType")]
+        public string PegPriceType { get; set; }
     }
 
     public class Trade
