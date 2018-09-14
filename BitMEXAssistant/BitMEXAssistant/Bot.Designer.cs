@@ -969,18 +969,13 @@
             // 
             this.nudLimitNowSellLevel.Location = new System.Drawing.Point(6, 97);
             this.nudLimitNowSellLevel.Maximum = new decimal(new int[] {
-            10000,
+            9,
             0,
             0,
             0});
             this.nudLimitNowSellLevel.Name = "nudLimitNowSellLevel";
             this.nudLimitNowSellLevel.Size = new System.Drawing.Size(81, 20);
             this.nudLimitNowSellLevel.TabIndex = 38;
-            this.nudLimitNowSellLevel.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
             this.nudLimitNowSellLevel.ValueChanged += new System.EventHandler(this.nudLimitNowSellLevel_ValueChanged);
             // 
             // btnLimitNowCheckPrice_Sell
@@ -1243,18 +1238,13 @@
             // 
             this.nudLimitNowBuyLevel.Location = new System.Drawing.Point(5, 98);
             this.nudLimitNowBuyLevel.Maximum = new decimal(new int[] {
-            10000,
+            9,
             0,
             0,
             0});
             this.nudLimitNowBuyLevel.Name = "nudLimitNowBuyLevel";
             this.nudLimitNowBuyLevel.Size = new System.Drawing.Size(81, 20);
             this.nudLimitNowBuyLevel.TabIndex = 37;
-            this.nudLimitNowBuyLevel.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
             this.nudLimitNowBuyLevel.ValueChanged += new System.EventHandler(this.nudLimitNowBuyLevel_ValueChanged);
             // 
             // btnLimitNowCheckPrice_Buy

@@ -1,4 +1,5 @@
-﻿using BitMEX;
+﻿#define USE_SEPARATE_THREADS
+using BitMEX;
 using CsvHelper;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -67,8 +68,15 @@ namespace BitMEXAssistant
         decimal ActiveTickSize = 0m;
         int Decimals = 0;
 
+
         EventHandler OnTradeUpdate;
         EventHandler OnOrderUpdate;
+
+        Thread AmendBuyThread;
+        Thread AmendSellThread;
+
+        ManualResetEvent UpdateLimitNowBuys = new ManualResetEvent(false);
+        ManualResetEvent UpdateLimitNowSells = new ManualResetEvent(false);
 
         decimal LimitNowBuyTicksFromCenter = decimal.Zero;
         decimal LimitNowSellTicksFromCenter = decimal.Zero;
@@ -185,6 +193,12 @@ namespace BitMEXAssistant
             Log("Initializing Websockets");
             OnTradeUpdate += LimitNow_TradeUpdate;
             OnOrderUpdate += LimitNow_OrderUpdate;
+
+            // we also start the limitnow update threads over here
+            AmendBuyThread = new Thread(LimitNowAmendBuyThreadAction);
+            AmendSellThread = new Thread(LimitNowAmendSellThreadAction);
+            AmendBuyThread.Start();
+            AmendSellThread.Start();
             if (Properties.Settings.Default.Network == "Real")
             {
                 ws_general = new WebSocket("wss://www.bitmex.com/realtime");
@@ -1805,6 +1819,45 @@ namespace BitMEXAssistant
         #endregion
 
         #region Limit Now
+
+        private void LimitNowAmendBuyThreadAction()
+        {
+            while(true)
+            {
+                //Console.WriteLine("Buy waiting");
+                UpdateLimitNowBuys.WaitOne();
+                //Console.WriteLine("Buy waited");
+                if (LimitNowBuyOrders.Count > 0)
+                {
+                    decimal Price = LimitNowGetOrderPrice("Buy");
+                    if (CheckOrderPrices(LimitNowBuyOrders, Price))
+                    {
+                        tmrLimitNowBuy_Tick(this, EventArgs.Empty);
+                    }
+                }
+                UpdateLimitNowBuys.Reset();
+            }
+        }
+
+        private void LimitNowAmendSellThreadAction()
+        {
+            while(true)
+            {
+                //Console.WriteLine("Sell waiting");
+                UpdateLimitNowSells.WaitOne();
+                //Console.WriteLine("Sell waited");
+                if (LimitNowSellOrders.Count > 0)
+                {
+                    decimal Price = LimitNowGetOrderPrice("Sell");
+                    if (CheckOrderPrices(LimitNowSellOrders, Price))
+                    {
+                        tmrLimitNowSell_Tick(this, EventArgs.Empty);
+                    }
+                }
+                UpdateLimitNowSells.Reset();
+            }
+        }
+
         private void nudLimitNowBuyContracts_ValueChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.LimitNowBuyContracts = (int)nudLimitNowBuyContracts.Value;
@@ -1847,7 +1900,7 @@ namespace BitMEXAssistant
             // Initial order
             decimal Price = LimitNowGetOrderPrice("Buy");
             List<Order> LimitNowOrderResult = null;
-            if (chkLimitNowOrderBookDetectionBuy.Checked)
+            if (chkLimitNowOrderBookDetectionBuy.Checked && false)
             {
                 LimitNowOrderResult = bitmex.LimitNowOrderBreakout(ActiveInstrument.Symbol, "Buy", (int)nudLimitNowBuyContracts.Value, Price, chkLimitNowBuyReduceOnly.Checked, true, false);
             }
@@ -1895,7 +1948,7 @@ namespace BitMEXAssistant
             List<Order> LimitNowOrderResult = null;
             // Initial order
             decimal Price = LimitNowGetOrderPrice("Sell");
-            if (chkLimitNowOrderBookDetectionSell.Checked)
+            if (chkLimitNowOrderBookDetectionSell.Checked && false) // for testing only
             {
                 LimitNowOrderResult = bitmex.LimitNowOrderBreakout(ActiveInstrument.Symbol, "Sell", (int)nudLimitNowSellContracts.Value, Price, chkLimitNowSellReduceOnly.Checked, true, false);
             }
@@ -2008,7 +2061,7 @@ namespace BitMEXAssistant
                         orders.Add(order);
                     }
                     string orderlist = JsonConvert.SerializeObject(orders);
-                    //Console.WriteLine("Amend Selling orders:" + orderlist);
+                    Console.WriteLine("Amend Selling orders:" + orderlist+":"+Price);
                     string res = bitmex.AmendBulkOrder(orderlist);
                     //Console.WriteLine("Amend Selling return:" + res);
                     if (res.Contains("Error"))
@@ -2056,18 +2109,21 @@ namespace BitMEXAssistant
             {
                 if (orders[i].Price != price)
                 {
-                    Log("Price changed:" + orders[i].Price + "=>" + price);
+                    //Log("Price changed:" + orders[i].Price + "=>" + price);
                     return true;
                 }
             }
             return false;
         }
 
-        private void LimitNow_TradeUpdate(object sender, EventArgs e)
+        private void UpdateOrders()
         {
             //Console.WriteLine("Trade Update");
             if (chkLimitNowOrderBookDetectionSell.Checked)
             {
+#if USE_SEPARATE_THREADS
+                UpdateLimitNowSells.Set();
+#else
                 if (LimitNowSellOrders.Count > 0)
                 {
                     decimal Price = LimitNowGetOrderPrice("Sell");
@@ -2076,14 +2132,14 @@ namespace BitMEXAssistant
                         //Log("Sell price changed");
                         tmrLimitNowSell_Tick(this, EventArgs.Empty);
                     }
-                    else
-                    {
-                        //Console.WriteLine("No change in sell");
-                    }
                 }
+#endif
             }
             if (chkLimitNowOrderBookDetectionBuy.Checked)
             {
+#if USE_SEPARATE_THREADS
+                UpdateLimitNowBuys.Set();
+#else
                 if (LimitNowBuyOrders.Count > 0)
                 {
                     decimal Price = LimitNowGetOrderPrice("Buy");
@@ -2091,50 +2147,24 @@ namespace BitMEXAssistant
                     {
                         //Log("Buy price changed");
                         tmrLimitNowBuy_Tick(this, EventArgs.Empty);
-                    }
-                    else
-                    {
-                        //Console.WriteLine("No change in buy");
-                    }
                 }
             }
+            else
+            {
+            }
+#endif
+            }
+        }
+        private void LimitNow_TradeUpdate(object sender, EventArgs e)
+        {
+            //Console.WriteLine("Trade Update");
+            UpdateOrders();
         }
 
         private void LimitNow_OrderUpdate(object sender, EventArgs e)
         {
             //Console.WriteLine("Order Update");
-            if (chkLimitNowOrderBookDetectionSell.Checked)
-            {
-                if (LimitNowSellOrders.Count > 0)
-                {
-                    decimal Price = LimitNowGetOrderPrice("Sell");
-                    if (CheckOrderPrices(LimitNowSellOrders, Price))
-                    {
-                        //Log("Sell price changed");
-                        tmrLimitNowSell_Tick(this, EventArgs.Empty);
-                    }
-                    else
-                    {
-                        //Console.WriteLine("No change in sell");
-                    }
-                }
-            }
-            if (chkLimitNowOrderBookDetectionBuy.Checked)
-            {
-                if (LimitNowBuyOrders.Count > 0)
-                {
-                    decimal Price = LimitNowGetOrderPrice("Buy");
-                    if (CheckOrderPrices(LimitNowBuyOrders, Price))
-                    {
-                        //Log("Buy price changed");
-                        tmrLimitNowBuy_Tick(this, EventArgs.Empty);
-                    }
-                    else
-                    {
-                        //Console.WriteLine("No change in buy");
-                    }
-                }
-            }
+            UpdateOrders();
         }
 
 
@@ -2155,11 +2185,13 @@ namespace BitMEXAssistant
 
         private void btnLimitNowBuyCancel_Click(object sender, EventArgs e)
         {
+            /*
             for (int i=0;i<LimitNowBuyOrders.Count;i++)
             {
                 bitmex.CancelOrder(LimitNowBuyOrders[i].OrderId);
             }
             LimitNowBuyOrders.Clear();
+            */
             //bitmex.CancelOrder(LimitNowBuyOrderId);
             chkLimitNowBuyContinue.Checked = false;
             LimitNowStopBuying();
@@ -2176,11 +2208,13 @@ namespace BitMEXAssistant
 
         private void btnLimitNowSellCancel_Click(object sender, EventArgs e)
         {
+            /*
             for (int i = 0; i < LimitNowSellOrders.Count; i++)
             {
                 bitmex.CancelOrder(LimitNowSellOrders[i].OrderId);
             }
             LimitNowSellOrders.Clear();
+            */
             //bitmex.CancelOrder(LimitNowSellOrderId);
             chkLimitNowSellContinue.Checked = false;
             LimitNowStopSelling();
@@ -2199,15 +2233,17 @@ namespace BitMEXAssistant
         {
             CancelAllBuys();
             tmrLimitNowBuy.Stop();
-
-            btnLimitNowBuyCancel.Visible = false;
-            btnLimitNowBuy.Visible = true;
             LimitNowBuyOrderId = "";
+            btnLimitNowBuyCancel.Invoke((MethodInvoker)(()=>
+                {
+                    btnLimitNowBuyCancel.Visible = false;
+                    btnLimitNowBuy.Visible = true;
+                    if (chkLimitNowBuyContinue.Checked)
+                    {
+                        LimitNowStartBuying();
+                    }
+                }));
 
-            if (chkLimitNowBuyContinue.Checked)
-            {
-                LimitNowStartBuying();
-            }
         }
 
         private void LimitNowStopSelling()
@@ -2215,15 +2251,17 @@ namespace BitMEXAssistant
             //Console.WriteLine("Sell timer stop selling");
             CancelAllSells();
             tmrLimitNowSell.Stop();
-
-            btnLimitNowSellCancel.Visible = false;
-            btnLimitNowSell.Visible = true;
             LimitNowSellOrderId = "";
-
-            if (chkLimitNowSellContinue.Checked)
+            btnLimitNowSellCancel.Invoke((MethodInvoker)(() =>
             {
-                LimitNowStartSelling();
-            }
+                btnLimitNowSellCancel.Visible = false;
+                btnLimitNowSell.Visible = true;
+
+                if (chkLimitNowSellContinue.Checked)
+                {
+                    LimitNowStartSelling();
+                }
+            }));
         }
 
         private void chkLimitNowBuyContinue_CheckedChanged(object sender, EventArgs e)
@@ -2375,7 +2413,7 @@ namespace BitMEXAssistant
         }
 
 
-        #endregion
+#endregion
 
 
 
