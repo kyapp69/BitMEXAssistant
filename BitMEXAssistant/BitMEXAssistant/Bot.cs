@@ -1741,11 +1741,23 @@ namespace BitMEXAssistant
 
         private void btnLimitNowBuy_Click(object sender, EventArgs e)
         {
+            Console.WriteLine("Limit now buy pressed");
+            /*
+            Task.Run(() => {
+                LimitNowBuyOrders = LimitNowStartBuying();
+            });
+            */
             LimitNowBuyOrders = LimitNowStartBuying();
         }
 
         private void btnLimitNowSell_Click(object sender, EventArgs e)
         {
+            Console.WriteLine("Limit now sell pressed");
+            /*
+            Task.Run(() => {
+                LimitNowSellOrders = LimitNowStartSelling();
+            });
+            */
             LimitNowSellOrders = LimitNowStartSelling();
         }
 

@@ -939,7 +939,7 @@
             this.chkLimitNowOrderBookDetectionSell.Visible = false;
             this.chkLimitNowOrderBookDetectionSell.CheckedChanged += new System.EventHandler(this.chkLimitNowOrderBookDetectionSell_CheckedChanged);
             // 
-            // nudLimitNowSafetySellDelta
+            // nudLimitNowStopLossSellDelta
             // 
             this.nudLimitNowStopLossSellDelta.Location = new System.Drawing.Point(95, 145);
             this.nudLimitNowStopLossSellDelta.Maximum = new decimal(new int[] {
@@ -952,7 +952,7 @@
             0,
             0,
             -2147483648});
-            this.nudLimitNowStopLossSellDelta.Name = "nudLimitNowSafetySellDelta";
+            this.nudLimitNowStopLossSellDelta.Name = "nudLimitNowStopLossSellDelta";
             this.nudLimitNowStopLossSellDelta.Size = new System.Drawing.Size(81, 20);
             this.nudLimitNowStopLossSellDelta.TabIndex = 35;
             this.nudLimitNowStopLossSellDelta.Value = new decimal(new int[] {
@@ -963,11 +963,11 @@
             this.nudLimitNowStopLossSellDelta.Visible = false;
             this.nudLimitNowStopLossSellDelta.ValueChanged += new System.EventHandler(this.nudLimitNowStopLossSellDelta_ValueChanged);
             // 
-            // chkLimitNowSafetySell
+            // chkLimitNowStopLossSell
             // 
             this.chkLimitNowStopLossSell.AutoSize = true;
             this.chkLimitNowStopLossSell.Location = new System.Drawing.Point(6, 150);
-            this.chkLimitNowStopLossSell.Name = "chkLimitNowSafetySell";
+            this.chkLimitNowStopLossSell.Name = "chkLimitNowStopLossSell";
             this.chkLimitNowStopLossSell.Size = new System.Drawing.Size(70, 15);
             this.chkLimitNowStopLossSell.TabIndex = 34;
             this.chkLimitNowStopLossSell.Text = "StopLoss";
@@ -1086,7 +1086,7 @@
             // nudLimitNowSellDelay
             // 
             this.nudLimitNowSellDelay.Increment = new decimal(new int[] {
-            1000,
+            250,
             0,
             0,
             0});
@@ -1097,7 +1097,7 @@
             0,
             0});
             this.nudLimitNowSellDelay.Minimum = new decimal(new int[] {
-            1000,
+            250,
             0,
             0,
             0});
@@ -1183,7 +1183,7 @@
             this.chkLimitNowOrderBookDetectionBuy.Visible = false;
             this.chkLimitNowOrderBookDetectionBuy.CheckedChanged += new System.EventHandler(this.chkLimitNowOrderBookDetectionBuy_CheckedChanged);
             // 
-            // nudLimitNowSafetyBuyDelta
+            // nudLimitNowStopLossBuyDelta
             // 
             this.nudLimitNowStopLossBuyDelta.Location = new System.Drawing.Point(91, 145);
             this.nudLimitNowStopLossBuyDelta.Maximum = new decimal(new int[] {
@@ -1196,7 +1196,7 @@
             0,
             0,
             -2147483648});
-            this.nudLimitNowStopLossBuyDelta.Name = "nudLimitNowSafetyBuyDelta";
+            this.nudLimitNowStopLossBuyDelta.Name = "nudLimitNowStopLossBuyDelta";
             this.nudLimitNowStopLossBuyDelta.Size = new System.Drawing.Size(81, 20);
             this.nudLimitNowStopLossBuyDelta.TabIndex = 34;
             this.nudLimitNowStopLossBuyDelta.Value = new decimal(new int[] {
@@ -1207,11 +1207,11 @@
             this.nudLimitNowStopLossBuyDelta.Visible = false;
             this.nudLimitNowStopLossBuyDelta.ValueChanged += new System.EventHandler(this.nudLimitNowStopLossBuyDelta_ValueChanged);
             // 
-            // chkLimitNowSafetyBuy
+            // chkLimitNowStopLossBuy
             // 
             this.chkLimitNowStopLossBuy.AutoSize = true;
             this.chkLimitNowStopLossBuy.Location = new System.Drawing.Point(6, 150);
-            this.chkLimitNowStopLossBuy.Name = "chkLimitNowSafetyBuy";
+            this.chkLimitNowStopLossBuy.Name = "chkLimitNowStopLossBuy";
             this.chkLimitNowStopLossBuy.Size = new System.Drawing.Size(70, 15);
             this.chkLimitNowStopLossBuy.TabIndex = 33;
             this.chkLimitNowStopLossBuy.Text = "StopLoss";
@@ -1330,7 +1330,7 @@
             // nudLimitNowBuyDelay
             // 
             this.nudLimitNowBuyDelay.Increment = new decimal(new int[] {
-            1000,
+            250,
             0,
             0,
             0});
@@ -1341,7 +1341,7 @@
             0,
             0});
             this.nudLimitNowBuyDelay.Minimum = new decimal(new int[] {
-            1000,
+            250,
             0,
             0,
             0});
