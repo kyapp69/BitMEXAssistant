@@ -32,6 +32,10 @@ namespace BitMEX
         private int rateLimit;
         List<string> errors = new List<string>();
 
+        public int MaxCallsLimit = 0;
+        public int CallsRemaining = 0;
+        public EventHandler UpdateApiRemainingHandler = null;
+
         public BitMEXApi(string bitmexKey = "", string bitmexSecret = "", bool RealNetwork = true, int rateLimit = 5000)
         {
             this.apiKey = bitmexKey;
@@ -144,10 +148,21 @@ namespace BitMEX
                 }
 
                 using (WebResponse webResponse = webRequest.GetResponse())
-                using (Stream str = webResponse.GetResponseStream())
-                using (StreamReader sr = new StreamReader(str))
                 {
-                    return sr.ReadToEnd();
+                    using (Stream str = webResponse.GetResponseStream())
+                    {
+                        //Console.WriteLine("Headers:" + webResponse.Headers.ToString());
+                        int.TryParse(webResponse.Headers.Get("x-ratelimit-limit"), out MaxCallsLimit);
+                        int.TryParse(webResponse.Headers.Get("x-ratelimit-remaining"), out CallsRemaining);
+                        if (UpdateApiRemainingHandler!=null)
+                        {
+                            UpdateApiRemainingHandler(this, EventArgs.Empty);
+                        }
+                        using (StreamReader sr = new StreamReader(str))
+                        {
+                            return sr.ReadToEnd();
+                        }
+                    }
                 }
             }
             catch (WebException wex)
@@ -529,7 +544,7 @@ namespace BitMEX
         public List<Order> LimitNowOrderSafety(string Symbol, string Side, int Quantity, decimal Price, bool ReduceOnly = false, bool PostOnly = false, bool Hidden = false)
         {
 #if TRUE
-            Console.WriteLine("LimitNowOrderSafety");
+            //Console.WriteLine("LimitNowOrderSafety");
             Order limitOrder = new Order();
             limitOrder.Symbol = Symbol;
             limitOrder.Side = Side;
@@ -665,7 +680,7 @@ namespace BitMEX
         public List<Order> LimitNowOrderBreakout(string Symbol, string Side, int Quantity, decimal Price, bool ReduceOnly = false, bool PostOnly = false, bool Hidden = false)
         {
 #if TRUE
-            Console.WriteLine("LimitNowOrderSafety");
+            //Console.WriteLine("LimitNowOrderSafety");
             Order limitOrder = new Order();
             limitOrder.Symbol = Symbol;
             limitOrder.Side = Side;

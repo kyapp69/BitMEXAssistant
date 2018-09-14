@@ -835,6 +835,36 @@ namespace BitMEXAssistant.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int LimitNowSellLevel
+        {
+            get
+            {
+                return ((int)(this["LimitNowSellLevel"]));
+            }
+            set
+            {
+                this["LimitNowSellLevel"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int LimitNowBuyLevel
+        {
+            get
+            {
+                return ((int)(this["LimitNowBuyLevel"]));
+            }
+            set
+            {
+                this["LimitNowBuyLevel"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public int TabSelection
         {
             get
