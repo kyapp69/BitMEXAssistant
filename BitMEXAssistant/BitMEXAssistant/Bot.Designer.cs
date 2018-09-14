@@ -74,6 +74,7 @@
             this.label31 = new System.Windows.Forms.Label();
             this.label30 = new System.Windows.Forms.Label();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.metroLabel12 = new MetroFramework.Controls.MetroLabel();
             this.metroLabel7 = new MetroFramework.Controls.MetroLabel();
             this.nudLimitNowSellLevel = new System.Windows.Forms.NumericUpDown();
             this.btnLimitNowCheckPrice_Sell = new MetroFramework.Controls.MetroButton();
@@ -93,6 +94,7 @@
             this.btnLimitNowSell = new MetroFramework.Controls.MetroButton();
             this.btnLimitNowSellCancel = new MetroFramework.Controls.MetroButton();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.metroLabel11 = new MetroFramework.Controls.MetroLabel();
             this.metroLabel8 = new MetroFramework.Controls.MetroLabel();
             this.nudLimitNowBuyLevel = new System.Windows.Forms.NumericUpDown();
             this.btnLimitNowCheckPrice_Buy = new MetroFramework.Controls.MetroButton();
@@ -930,6 +932,7 @@
             // groupBox8
             // 
             this.groupBox8.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox8.Controls.Add(this.metroLabel12);
             this.groupBox8.Controls.Add(this.metroLabel7);
             this.groupBox8.Controls.Add(this.nudLimitNowSellLevel);
             this.groupBox8.Controls.Add(this.btnLimitNowCheckPrice_Sell);
@@ -955,6 +958,15 @@
             this.groupBox8.TabIndex = 32;
             this.groupBox8.TabStop = false;
             this.groupBox8.Text = "Sell";
+            // 
+            // metroLabel12
+            // 
+            this.metroLabel12.AutoSize = true;
+            this.metroLabel12.Location = new System.Drawing.Point(155, 174);
+            this.metroLabel12.Name = "metroLabel12";
+            this.metroLabel12.Size = new System.Drawing.Size(59, 19);
+            this.metroLabel12.TabIndex = 40;
+            this.metroLabel12.Text = "Ticks Off";
             // 
             // metroLabel7
             // 
@@ -993,24 +1005,23 @@
             this.chkLimitNowOrderBookDetectionSell.AutoSize = true;
             this.chkLimitNowOrderBookDetectionSell.Location = new System.Drawing.Point(6, 198);
             this.chkLimitNowOrderBookDetectionSell.Name = "chkLimitNowOrderBookDetectionSell";
-            this.chkLimitNowOrderBookDetectionSell.Size = new System.Drawing.Size(131, 15);
+            this.chkLimitNowOrderBookDetectionSell.Size = new System.Drawing.Size(121, 15);
             this.chkLimitNowOrderBookDetectionSell.TabIndex = 36;
-            this.chkLimitNowOrderBookDetectionSell.Text = "OrderBookDetection";
+            this.chkLimitNowOrderBookDetectionSell.Text = "OrderBook Update";
             this.chkLimitNowOrderBookDetectionSell.UseSelectable = true;
             this.chkLimitNowOrderBookDetectionSell.CheckedChanged += new System.EventHandler(this.chkLimitNowOrderBookDetectionSell_CheckedChanged);
             // 
             // nudLimitNowStopLossSellDelta
             // 
-            this.nudLimitNowStopLossSellDelta.Location = new System.Drawing.Point(89, 174);
+            this.nudLimitNowStopLossSellDelta.Location = new System.Drawing.Point(89, 172);
             this.nudLimitNowStopLossSellDelta.Maximum = new decimal(new int[] {
             10000,
             0,
             0,
             0});
             this.nudLimitNowStopLossSellDelta.Name = "nudLimitNowStopLossSellDelta";
-            this.nudLimitNowStopLossSellDelta.Size = new System.Drawing.Size(81, 20);
+            this.nudLimitNowStopLossSellDelta.Size = new System.Drawing.Size(59, 20);
             this.nudLimitNowStopLossSellDelta.TabIndex = 35;
-            this.nudLimitNowStopLossSellDelta.Visible = false;
             this.nudLimitNowStopLossSellDelta.ValueChanged += new System.EventHandler(this.nudLimitNowStopLossSellDelta_ValueChanged);
             // 
             // chkLimitNowStopLossSell
@@ -1199,6 +1210,7 @@
             // groupBox7
             // 
             this.groupBox7.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox7.Controls.Add(this.metroLabel11);
             this.groupBox7.Controls.Add(this.metroLabel8);
             this.groupBox7.Controls.Add(this.nudLimitNowBuyLevel);
             this.groupBox7.Controls.Add(this.btnLimitNowCheckPrice_Buy);
@@ -1224,6 +1236,15 @@
             this.groupBox7.TabIndex = 31;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Buy";
+            // 
+            // metroLabel11
+            // 
+            this.metroLabel11.AutoSize = true;
+            this.metroLabel11.Location = new System.Drawing.Point(155, 174);
+            this.metroLabel11.Name = "metroLabel11";
+            this.metroLabel11.Size = new System.Drawing.Size(59, 19);
+            this.metroLabel11.TabIndex = 39;
+            this.metroLabel11.Text = "Ticks Off";
             // 
             // metroLabel8
             // 
@@ -1262,9 +1283,9 @@
             this.chkLimitNowOrderBookDetectionBuy.AutoSize = true;
             this.chkLimitNowOrderBookDetectionBuy.Location = new System.Drawing.Point(6, 194);
             this.chkLimitNowOrderBookDetectionBuy.Name = "chkLimitNowOrderBookDetectionBuy";
-            this.chkLimitNowOrderBookDetectionBuy.Size = new System.Drawing.Size(131, 15);
+            this.chkLimitNowOrderBookDetectionBuy.Size = new System.Drawing.Size(121, 15);
             this.chkLimitNowOrderBookDetectionBuy.TabIndex = 35;
-            this.chkLimitNowOrderBookDetectionBuy.Text = "OrderBookDetection";
+            this.chkLimitNowOrderBookDetectionBuy.Text = "OrderBook Update";
             this.chkLimitNowOrderBookDetectionBuy.UseSelectable = true;
             this.chkLimitNowOrderBookDetectionBuy.CheckedChanged += new System.EventHandler(this.chkLimitNowOrderBookDetectionBuy_CheckedChanged);
             // 
@@ -1277,9 +1298,8 @@
             0,
             0});
             this.nudLimitNowStopLossBuyDelta.Name = "nudLimitNowStopLossBuyDelta";
-            this.nudLimitNowStopLossBuyDelta.Size = new System.Drawing.Size(81, 20);
+            this.nudLimitNowStopLossBuyDelta.Size = new System.Drawing.Size(59, 20);
             this.nudLimitNowStopLossBuyDelta.TabIndex = 34;
-            this.nudLimitNowStopLossBuyDelta.Visible = false;
             this.nudLimitNowStopLossBuyDelta.ValueChanged += new System.EventHandler(this.nudLimitNowStopLossBuyDelta_ValueChanged);
             // 
             // chkLimitNowStopLossBuy
@@ -3699,5 +3719,7 @@
         private MetroFramework.Controls.MetroLabel metroLabel9;
         private MetroFramework.Controls.MetroTextBox txtRemainingCall;
         private MetroFramework.Controls.MetroButton btnClearLog;
+        private MetroFramework.Controls.MetroLabel metroLabel12;
+        private MetroFramework.Controls.MetroLabel metroLabel11;
     }
 }

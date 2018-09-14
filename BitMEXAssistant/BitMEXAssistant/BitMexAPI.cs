@@ -541,7 +541,7 @@ namespace BitMEX
             }
         }
 
-        public List<Order> LimitNowOrderSafety(string Symbol, string Side, int Quantity, decimal Price, bool ReduceOnly = false, bool PostOnly = false, bool Hidden = false)
+        public List<Order> LimitNowOrderSafety(string Symbol, string Side, int Quantity, decimal Price, decimal StopLossDelta, bool ReduceOnly = false, bool PostOnly = false, bool Hidden = false)
         {
 #if TRUE
             //Console.WriteLine("LimitNowOrderSafety");
@@ -578,10 +578,12 @@ namespace BitMEX
             if (Side == "Buy")
             {
                 OTOOrder.Side = "Sell";
+                OTOOrder.Price = Price - StopLossDelta;
             }
             else
             {
                 OTOOrder.Side = "Buy";
+                OTOOrder.Price = Price + StopLossDelta;
             }
             OTOOrder.OrderQty = Quantity;
             OTOOrder.OrdType = "Limit";

@@ -82,6 +82,8 @@ namespace BitMEXAssistant
         decimal LimitNowSellTicksFromCenter = decimal.Zero;
         string LimitNowBuyMethod = "";
         string LimitNowSellMethod = "";
+        decimal LimitNowStopLossSellDelta = decimal.Zero;
+        decimal LimitNowStopLossBuyDelta = decimal.Zero;
 
         int LimitNowBuyLevel = 0;
         int LimitNowSellLevel = 0;
@@ -1899,6 +1901,7 @@ namespace BitMEXAssistant
             LimitNowBuyOrders.Clear();
             // Initial order
             decimal Price = LimitNowGetOrderPrice("Buy");
+            decimal StopLossDelta = ActiveInstrument.TickSize * LimitNowStopLossBuyDelta;
             List<Order> LimitNowOrderResult = null;
             if (chkLimitNowOrderBookDetectionBuy.Checked && false)
             {
@@ -1908,7 +1911,7 @@ namespace BitMEXAssistant
             {
                 if (chkLimitNowStopLossBuy.Checked)
                 {
-                    LimitNowOrderResult = bitmex.LimitNowOrderSafety(ActiveInstrument.Symbol, "Buy", (int)nudLimitNowBuyContracts.Value, Price, chkLimitNowBuyReduceOnly.Checked, true, false);
+                    LimitNowOrderResult = bitmex.LimitNowOrderSafety(ActiveInstrument.Symbol, "Buy", (int)nudLimitNowBuyContracts.Value, Price, StopLossDelta, chkLimitNowBuyReduceOnly.Checked, true, false);
                 }
                 else
                 {
@@ -1948,6 +1951,7 @@ namespace BitMEXAssistant
             List<Order> LimitNowOrderResult = null;
             // Initial order
             decimal Price = LimitNowGetOrderPrice("Sell");
+            decimal StopLossDelta = ActiveInstrument.TickSize * LimitNowStopLossSellDelta;
             if (chkLimitNowOrderBookDetectionSell.Checked && false) // for testing only
             {
                 LimitNowOrderResult = bitmex.LimitNowOrderBreakout(ActiveInstrument.Symbol, "Sell", (int)nudLimitNowSellContracts.Value, Price, chkLimitNowSellReduceOnly.Checked, true, false);
@@ -1956,7 +1960,7 @@ namespace BitMEXAssistant
             {
                 if (chkLimitNowStopLossSell.Checked)
                 {
-                    LimitNowOrderResult = bitmex.LimitNowOrderSafety(ActiveInstrument.Symbol, "Sell", (int)nudLimitNowSellContracts.Value, Price, chkLimitNowSellReduceOnly.Checked, true, false);
+                    LimitNowOrderResult = bitmex.LimitNowOrderSafety(ActiveInstrument.Symbol, "Sell", (int)nudLimitNowSellContracts.Value, Price, StopLossDelta, chkLimitNowSellReduceOnly.Checked, true, false);
                 }
                 else
                 {
@@ -2013,6 +2017,10 @@ namespace BitMEXAssistant
                     {
                         LimitNowBuyOrders[i].Price = Price;
                         LimitNowBuyOrders[i].OrderQty = Contracts;
+                        if (LimitNowBuyOrders[i].ContingencyType == "")
+                        {
+                            LimitNowBuyOrders[i].Price = Price - ActiveInstrument.TickSize * LimitNowStopLossBuyDelta;
+                        }
                         //LimitNowBuyOrders[i].OrdStatus = "";
                         OrderAmend order = new OrderAmend(LimitNowBuyOrders[i]);
                         orders.Add(order);
@@ -2056,6 +2064,10 @@ namespace BitMEXAssistant
                     {
                         LimitNowSellOrders[i].Price = Price;
                         LimitNowSellOrders[i].OrderQty = Contracts;
+                        if (LimitNowSellOrders[i].ContingencyType == "")
+                        {
+                            LimitNowSellOrders[i].Price = Price + ActiveInstrument.TickSize * LimitNowStopLossSellDelta;
+                        }
                         //LimitNowSellOrders[i].OrdStatus = "";
                         OrderAmend order = new OrderAmend(LimitNowSellOrders[i]);
                         orders.Add(order);
@@ -2729,12 +2741,14 @@ namespace BitMEXAssistant
         private void nudLimitNowStopLossBuyDelta_ValueChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.LimitNowStopLossBuyDelta = nudLimitNowStopLossBuyDelta.Value;
+            LimitNowStopLossBuyDelta = nudLimitNowStopLossBuyDelta.Value;
             SaveSettings();
         }
 
         private void nudLimitNowStopLossSellDelta_ValueChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.LimitNowStopLossSellDelta = nudLimitNowStopLossSellDelta.Value;
+            LimitNowStopLossSellDelta = nudLimitNowStopLossSellDelta.Value;
             SaveSettings();
         }
 
@@ -2759,13 +2773,29 @@ namespace BitMEXAssistant
         private void btnLimitNowCheckPrice_Sell_Click(object sender, EventArgs e)
         {
             decimal OrderPrice = LimitNowGetOrderPrice("Sell");
-            Log("Sell Order Price:" + OrderPrice);
+            decimal StopLossDelta = ActiveInstrument.TickSize * LimitNowStopLossSellDelta;
+            if (chkLimitNowStopLossSell.Checked)
+            {
+                Log("Sell Order Price:" + OrderPrice+":SL:"+(OrderPrice+StopLossDelta));
+            }
+            else
+            {
+                Log("Sell Order Price:" + OrderPrice);
+            }
         }
 
         private void btnLimitNowCheckPrice_Buy_Click(object sender, EventArgs e)
         {
             decimal OrderPrice = LimitNowGetOrderPrice("Buy");
-            Log("Buy Order Price:" + OrderPrice);
+            decimal StopLossDelta = ActiveInstrument.TickSize * LimitNowStopLossBuyDelta;
+            if (chkLimitNowStopLossBuy.Checked)
+            {
+                Log("Buy Order Price:" + OrderPrice + ":SL:" + (OrderPrice - StopLossDelta));
+            }
+            else
+            {
+                Log("Buy Order Price:" + OrderPrice);
+            }
         }
 
         private void nudLimitNowBuyLevel_ValueChanged(object sender, EventArgs e)
