@@ -1,5 +1,5 @@
 ﻿using BitMEX;
-using CsvHelper;
+//using CsvHelper;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,7 +20,7 @@ namespace BitMEXAssistant
 
         BitMEXApi bitmex;
         public bool APIValid = false;
-        public bool FormClosed = false;
+        public bool DialogClosed = false;
 
         public APIInfo()
         {
@@ -89,7 +89,7 @@ namespace BitMEXAssistant
                 {
                     // If it shoots an error, API is invalid.
                     APIValid = false;
-                    lblAPIStatus.Text = "API info is invalid!";
+                    lblAPIStatus.Text = "API info is invalid!:"+ex.Message;
                     lblAPIStatus.ForeColor = Color.Red;
                 }
             }
@@ -123,7 +123,7 @@ namespace BitMEXAssistant
             catch (Exception ex)
             {
                 APIValid = false;
-                lblAPIStatus.Text = "API info is invalid!";
+                lblAPIStatus.Text = "API info is invalid!:"+ex.Message;
                 lblAPIStatus.ForeColor = Color.Red;
             }
         }
@@ -204,7 +204,7 @@ namespace BitMEXAssistant
 
         private void metroButton1_Click(object sender, EventArgs e)
         {
-            FormClosed = true;
+            DialogClosed = true;
             this.Visible = false;
         }
     }

@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 
+#pragma warning disable CS1634, CS0168, CS0162
 namespace BitMEX
 {
     public class OrderBookItem

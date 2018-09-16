@@ -182,9 +182,12 @@
             this.chkSettingOverloadRetry = new MetroFramework.Controls.MetroCheckBox();
             this.nudSettingsOverloadRetryAttempts = new System.Windows.Forms.NumericUpDown();
             this.tabDonate = new MetroFramework.Controls.MetroTabPage();
+            this.metroLabel16 = new MetroFramework.Controls.MetroLabel();
+            this.metroLabel15 = new MetroFramework.Controls.MetroLabel();
+            this.metroLabel14 = new MetroFramework.Controls.MetroLabel();
+            this.metroLabel13 = new MetroFramework.Controls.MetroLabel();
             this.lblDonateAddress = new MetroFramework.Controls.MetroLabel();
             this.label16 = new MetroFramework.Controls.MetroLabel();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.tabVideos = new System.Windows.Forms.TabPage();
             this.tmrDCA = new System.Windows.Forms.Timer(this.components);
             this.btnPositionMargin = new MetroFramework.Controls.MetroButton();
@@ -209,12 +212,10 @@
             this.tmrClientUpdates = new System.Windows.Forms.Timer(this.components);
             this.nudCurrentPrice = new System.Windows.Forms.NumericUpDown();
             this.lblDonate = new MetroFramework.Controls.MetroLabel();
-            this.pbxYouTubeSubscribe = new System.Windows.Forms.PictureBox();
             this.tmrLimitNowBuy = new System.Windows.Forms.Timer(this.components);
             this.tmrLimitNowSell = new System.Windows.Forms.Timer(this.components);
             this.metroStyleManager1 = new MetroFramework.Components.MetroStyleManager(this.components);
             this.metroLabel1 = new MetroFramework.Controls.MetroLabel();
-            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.MetroToolTip = new MetroFramework.Components.MetroToolTip();
             this.lblBalanceAndTime = new MetroFramework.Controls.MetroLabel();
             this.lblNetworkAndVersion = new MetroFramework.Controls.MetroLabel();
@@ -223,7 +224,6 @@
             this.label22 = new System.Windows.Forms.Label();
             this.YouTubeVideoBrowser = new System.Windows.Forms.WebBrowser();
             this.metroLabel6 = new MetroFramework.Controls.MetroLabel();
-            this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.metroPanel1 = new MetroFramework.Controls.MetroPanel();
             this.ConsoleText = new System.Windows.Forms.TextBox();
             this.txtMaxCall = new MetroFramework.Controls.MetroTextBox();
@@ -231,6 +231,12 @@
             this.metroLabel9 = new MetroFramework.Controls.MetroLabel();
             this.metroLabel10 = new MetroFramework.Controls.MetroLabel();
             this.btnClearLog = new MetroFramework.Controls.MetroButton();
+            this.pictureBox3 = new System.Windows.Forms.PictureBox();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.pictureBox5 = new System.Windows.Forms.PictureBox();
+            this.pictureBox4 = new System.Windows.Forms.PictureBox();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.pbxYouTubeSubscribe = new System.Windows.Forms.PictureBox();
             this.TabControl.SuspendLayout();
             this.tabManual.SuspendLayout();
             this.groupBox5.SuspendLayout();
@@ -281,16 +287,18 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudSettingsRetryWaitTime)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSettingsOverloadRetryAttempts)).BeginInit();
             this.tabDonate.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudPositionLimitPrice)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudPositionMargin)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudCurrentPrice)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pbxYouTubeSubscribe)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.metroStyleManager1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.pnlPosition.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             this.metroPanel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbxYouTubeSubscribe)).BeginInit();
             this.SuspendLayout();
             // 
             // ddlCandleTimes
@@ -351,14 +359,14 @@
             this.TabControl.Controls.Add(this.tabLimitNow);
             this.TabControl.Controls.Add(this.tabSpread);
             this.TabControl.Controls.Add(this.tabDCA);
-            this.TabControl.Controls.Add(this.tabBreakout);
             this.TabControl.Controls.Add(this.tabStops);
             this.TabControl.Controls.Add(this.tabSettings);
+            this.TabControl.Controls.Add(this.tabBreakout);
             this.TabControl.Controls.Add(this.tabDonate);
             this.TabControl.Controls.Add(this.tabVideos);
             this.TabControl.Location = new System.Drawing.Point(0, 125);
             this.TabControl.Name = "TabControl";
-            this.TabControl.SelectedIndex = 1;
+            this.TabControl.SelectedIndex = 7;
             this.TabControl.Size = new System.Drawing.Size(857, 394);
             this.TabControl.Style = MetroFramework.MetroColorStyle.White;
             this.TabControl.TabIndex = 14;
@@ -1656,7 +1664,7 @@
             this.label14.AutoSize = true;
             this.label14.Location = new System.Drawing.Point(92, 47);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(43, 19);
+            this.label14.Size = new System.Drawing.Size(42, 19);
             this.label14.TabIndex = 3;
             this.label14.Text = "Apart";
             // 
@@ -1810,7 +1818,7 @@
             this.label10.AutoSize = true;
             this.label10.Location = new System.Drawing.Point(92, 47);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(43, 19);
+            this.label10.Size = new System.Drawing.Size(42, 19);
             this.label10.TabIndex = 3;
             this.label10.Text = "Apart";
             // 
@@ -1922,7 +1930,7 @@
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(6, 21);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(87, 19);
+            this.label4.Size = new System.Drawing.Size(88, 19);
             this.label4.TabIndex = 33;
             this.label4.Text = "Contracts Per";
             // 
@@ -2076,7 +2084,7 @@
             this.lblDCASummary.AutoSize = true;
             this.lblDCASummary.Location = new System.Drawing.Point(6, 160);
             this.lblDCASummary.Name = "lblDCASummary";
-            this.lblDCASummary.Size = new System.Drawing.Size(97, 19);
+            this.lblDCASummary.Size = new System.Drawing.Size(96, 19);
             this.lblDCASummary.TabIndex = 32;
             this.lblDCASummary.Text = "DCA Summary";
             // 
@@ -2184,7 +2192,7 @@
             this.metroLabel4.AutoSize = true;
             this.metroLabel4.Location = new System.Drawing.Point(3, 199);
             this.metroLabel4.Name = "metroLabel4";
-            this.metroLabel4.Size = new System.Drawing.Size(83, 19);
+            this.metroLabel4.Size = new System.Drawing.Size(85, 19);
             this.metroLabel4.TabIndex = 40;
             this.metroLabel4.Text = "Trigger Price";
             // 
@@ -2194,7 +2202,7 @@
             this.lblStopTrailingLimitOffsetPrice.FontSize = MetroFramework.MetroLabelSize.Tall;
             this.lblStopTrailingLimitOffsetPrice.Location = new System.Drawing.Point(134, 218);
             this.lblStopTrailingLimitOffsetPrice.Name = "lblStopTrailingLimitOffsetPrice";
-            this.lblStopTrailingLimitOffsetPrice.Size = new System.Drawing.Size(72, 25);
+            this.lblStopTrailingLimitOffsetPrice.Size = new System.Drawing.Size(70, 25);
             this.lblStopTrailingLimitOffsetPrice.TabIndex = 39;
             this.lblStopTrailingLimitOffsetPrice.Text = "4564.65";
             // 
@@ -2277,7 +2285,7 @@
             this.lblStopTraillingPrice.FontSize = MetroFramework.MetroLabelSize.Tall;
             this.lblStopTraillingPrice.Location = new System.Drawing.Point(6, 218);
             this.lblStopTraillingPrice.Name = "lblStopTraillingPrice";
-            this.lblStopTraillingPrice.Size = new System.Drawing.Size(72, 25);
+            this.lblStopTraillingPrice.Size = new System.Drawing.Size(70, 25);
             this.lblStopTraillingPrice.TabIndex = 32;
             this.lblStopTraillingPrice.Text = "4654.65";
             // 
@@ -2308,7 +2316,7 @@
             this.metroLabel2.AutoSize = true;
             this.metroLabel2.Location = new System.Drawing.Point(94, 83);
             this.metroLabel2.Name = "metroLabel2";
-            this.metroLabel2.Size = new System.Drawing.Size(32, 19);
+            this.metroLabel2.Size = new System.Drawing.Size(34, 19);
             this.metroLabel2.TabIndex = 3;
             this.metroLabel2.Text = "Trail";
             // 
@@ -2317,7 +2325,7 @@
             this.metroLabel3.AutoSize = true;
             this.metroLabel3.Location = new System.Drawing.Point(94, 113);
             this.metroLabel3.Name = "metroLabel3";
-            this.metroLabel3.Size = new System.Drawing.Size(76, 19);
+            this.metroLabel3.Size = new System.Drawing.Size(77, 19);
             this.metroLabel3.TabIndex = 22;
             this.metroLabel3.Text = "Order Type";
             // 
@@ -2348,7 +2356,7 @@
             this.lblSettingsWebsocketInfo.AutoSize = true;
             this.lblSettingsWebsocketInfo.Location = new System.Drawing.Point(6, 157);
             this.lblSettingsWebsocketInfo.Name = "lblSettingsWebsocketInfo";
-            this.lblSettingsWebsocketInfo.Size = new System.Drawing.Size(105, 19);
+            this.lblSettingsWebsocketInfo.Size = new System.Drawing.Size(106, 19);
             this.lblSettingsWebsocketInfo.TabIndex = 6;
             this.lblSettingsWebsocketInfo.Text = "Websocket Info: ";
             // 
@@ -2444,6 +2452,12 @@
             // 
             // tabDonate
             // 
+            this.tabDonate.Controls.Add(this.metroLabel16);
+            this.tabDonate.Controls.Add(this.metroLabel15);
+            this.tabDonate.Controls.Add(this.metroLabel14);
+            this.tabDonate.Controls.Add(this.metroLabel13);
+            this.tabDonate.Controls.Add(this.pictureBox5);
+            this.tabDonate.Controls.Add(this.pictureBox4);
             this.tabDonate.Controls.Add(this.lblDonateAddress);
             this.tabDonate.Controls.Add(this.label16);
             this.tabDonate.Controls.Add(this.pictureBox1);
@@ -2459,12 +2473,50 @@
             this.tabDonate.VerticalScrollbarHighlightOnWheel = false;
             this.tabDonate.VerticalScrollbarSize = 10;
             // 
+            // metroLabel16
+            // 
+            this.metroLabel16.AutoSize = true;
+            this.metroLabel16.FontWeight = MetroFramework.MetroLabelWeight.Bold;
+            this.metroLabel16.Location = new System.Drawing.Point(475, 310);
+            this.metroLabel16.Name = "metroLabel16";
+            this.metroLabel16.Size = new System.Drawing.Size(358, 19);
+            this.metroLabel16.TabIndex = 8;
+            this.metroLabel16.Text = "BTC:bc1qz8rvxacvhzp7rfc6untajvgl2ad3r3dhwhdzkz";
+            // 
+            // metroLabel15
+            // 
+            this.metroLabel15.AutoSize = true;
+            this.metroLabel15.FontWeight = MetroFramework.MetroLabelWeight.Bold;
+            this.metroLabel15.Location = new System.Drawing.Point(14, 310);
+            this.metroLabel15.Name = "metroLabel15";
+            this.metroLabel15.Size = new System.Drawing.Size(346, 19);
+            this.metroLabel15.TabIndex = 7;
+            this.metroLabel15.Text = "BTC:bc1qlhksxw38wajyft3z0znnfvt47qrsk8f5f6sc73";
+            // 
+            // metroLabel14
+            // 
+            this.metroLabel14.Location = new System.Drawing.Point(608, 179);
+            this.metroLabel14.Name = "metroLabel14";
+            this.metroLabel14.Size = new System.Drawing.Size(199, 73);
+            this.metroLabel14.TabIndex = 6;
+            this.metroLabel14.Text = "Donate and contribute towards the start of a deribit version";
+            this.metroLabel14.WrapToLine = true;
+            // 
+            // metroLabel13
+            // 
+            this.metroLabel13.Location = new System.Drawing.Point(153, 179);
+            this.metroLabel13.Name = "metroLabel13";
+            this.metroLabel13.Size = new System.Drawing.Size(251, 73);
+            this.metroLabel13.TabIndex = 5;
+            this.metroLabel13.Text = "Donate and contribute towards efforts to improve this version even more.";
+            this.metroLabel13.WrapToLine = true;
+            // 
             // lblDonateAddress
             // 
             this.lblDonateAddress.AutoSize = true;
             this.lblDonateAddress.Cursor = System.Windows.Forms.Cursors.Hand;
             this.lblDonateAddress.FontWeight = MetroFramework.MetroLabelWeight.Bold;
-            this.lblDonateAddress.Location = new System.Drawing.Point(171, 141);
+            this.lblDonateAddress.Location = new System.Drawing.Point(170, 33);
             this.lblDonateAddress.Name = "lblDonateAddress";
             this.lblDonateAddress.Size = new System.Drawing.Size(327, 19);
             this.lblDonateAddress.TabIndex = 2;
@@ -2475,21 +2527,11 @@
             // label16
             // 
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(171, 121);
+            this.label16.Location = new System.Drawing.Point(170, 13);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(376, 19);
             this.label16.TabIndex = 1;
             this.label16.Text = "Any BTC donations are appreciated for supporting this project.";
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(14, 13);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(150, 150);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
             // 
             // tabVideos
             // 
@@ -3122,18 +3164,6 @@
             this.lblDonate.UseStyleColors = true;
             this.lblDonate.Click += new System.EventHandler(this.lblDonate_Click);
             // 
-            // pbxYouTubeSubscribe
-            // 
-            this.pbxYouTubeSubscribe.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.pbxYouTubeSubscribe.Image = ((System.Drawing.Image)(resources.GetObject("pbxYouTubeSubscribe.Image")));
-            this.pbxYouTubeSubscribe.Location = new System.Drawing.Point(578, 12);
-            this.pbxYouTubeSubscribe.Name = "pbxYouTubeSubscribe";
-            this.pbxYouTubeSubscribe.Size = new System.Drawing.Size(137, 30);
-            this.pbxYouTubeSubscribe.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pbxYouTubeSubscribe.TabIndex = 19;
-            this.pbxYouTubeSubscribe.TabStop = false;
-            this.pbxYouTubeSubscribe.Click += new System.EventHandler(this.pbxYouTubeSubscribe_Click);
-            // 
             // tmrLimitNowBuy
             // 
             this.tmrLimitNowBuy.Interval = 1000;
@@ -3158,18 +3188,6 @@
             this.metroLabel1.Size = new System.Drawing.Size(43, 19);
             this.metroLabel1.TabIndex = 20;
             this.metroLabel1.Text = "Price";
-            // 
-            // pictureBox2
-            // 
-            this.pictureBox2.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
-            this.pictureBox2.Location = new System.Drawing.Point(200, 10);
-            this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(57, 53);
-            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox2.TabIndex = 21;
-            this.pictureBox2.TabStop = false;
-            this.pictureBox2.Click += new System.EventHandler(this.pictureBox2_Click);
             // 
             // MetroToolTip
             // 
@@ -3272,18 +3290,6 @@
             this.metroLabel6.TabIndex = 28;
             this.metroLabel6.Text = "This application is not affiliated with BitMEX";
             this.metroLabel6.UseStyleColors = true;
-            // 
-            // pictureBox3
-            // 
-            this.pictureBox3.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.pictureBox3.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox3.Image")));
-            this.pictureBox3.Location = new System.Drawing.Point(721, 13);
-            this.pictureBox3.Name = "pictureBox3";
-            this.pictureBox3.Size = new System.Drawing.Size(30, 30);
-            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox3.TabIndex = 29;
-            this.pictureBox3.TabStop = false;
-            this.pictureBox3.Click += new System.EventHandler(this.pictureBox3_Click);
             // 
             // metroPanel1
             // 
@@ -3402,11 +3408,78 @@
             this.btnClearLog.UseSelectable = true;
             this.btnClearLog.Click += new System.EventHandler(this.btnClearLog_Click);
             // 
+            // pictureBox3
+            // 
+            this.pictureBox3.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.pictureBox3.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox3.Image")));
+            this.pictureBox3.Location = new System.Drawing.Point(721, 13);
+            this.pictureBox3.Name = "pictureBox3";
+            this.pictureBox3.Size = new System.Drawing.Size(30, 30);
+            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox3.TabIndex = 29;
+            this.pictureBox3.TabStop = false;
+            this.pictureBox3.Click += new System.EventHandler(this.pictureBox3_Click);
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
+            this.pictureBox2.Location = new System.Drawing.Point(200, 10);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(57, 53);
+            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox2.TabIndex = 21;
+            this.pictureBox2.TabStop = false;
+            this.pictureBox2.Click += new System.EventHandler(this.pictureBox2_Click);
+            // 
+            // pictureBox5
+            // 
+            this.pictureBox5.Image = global::BitMEXAssistant.Properties.Resources.qr_ky_1;
+            this.pictureBox5.InitialImage = ((System.Drawing.Image)(resources.GetObject("pictureBox5.InitialImage")));
+            this.pictureBox5.Location = new System.Drawing.Point(14, 179);
+            this.pictureBox5.Name = "pictureBox5";
+            this.pictureBox5.Size = new System.Drawing.Size(128, 128);
+            this.pictureBox5.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox5.TabIndex = 4;
+            this.pictureBox5.TabStop = false;
+            // 
+            // pictureBox4
+            // 
+            this.pictureBox4.Image = global::BitMEXAssistant.Properties.Resources.qr_ky_deribit;
+            this.pictureBox4.Location = new System.Drawing.Point(475, 179);
+            this.pictureBox4.Name = "pictureBox4";
+            this.pictureBox4.Size = new System.Drawing.Size(128, 128);
+            this.pictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox4.TabIndex = 3;
+            this.pictureBox4.TabStop = false;
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.pictureBox1.Location = new System.Drawing.Point(14, 13);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(150, 150);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.TabIndex = 0;
+            this.pictureBox1.TabStop = false;
+            // 
+            // pbxYouTubeSubscribe
+            // 
+            this.pbxYouTubeSubscribe.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.pbxYouTubeSubscribe.Image = ((System.Drawing.Image)(resources.GetObject("pbxYouTubeSubscribe.Image")));
+            this.pbxYouTubeSubscribe.Location = new System.Drawing.Point(578, 12);
+            this.pbxYouTubeSubscribe.Name = "pbxYouTubeSubscribe";
+            this.pbxYouTubeSubscribe.Size = new System.Drawing.Size(137, 30);
+            this.pbxYouTubeSubscribe.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pbxYouTubeSubscribe.TabIndex = 19;
+            this.pbxYouTubeSubscribe.TabStop = false;
+            this.pbxYouTubeSubscribe.Click += new System.EventHandler(this.pbxYouTubeSubscribe_Click);
+            // 
             // Bot
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(857, 657);
+            this.ClientSize = new System.Drawing.Size(861, 657);
             this.Controls.Add(this.btnClearLog);
             this.Controls.Add(this.metroLabel10);
             this.Controls.Add(this.metroLabel9);
@@ -3503,17 +3576,19 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudSettingsOverloadRetryAttempts)).EndInit();
             this.tabDonate.ResumeLayout(false);
             this.tabDonate.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudPositionLimitPrice)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudPositionMargin)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudCurrentPrice)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pbxYouTubeSubscribe)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.metroStyleManager1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.pnlPosition.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
             this.metroPanel1.ResumeLayout(false);
             this.metroPanel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbxYouTubeSubscribe)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -3721,5 +3796,11 @@
         private MetroFramework.Controls.MetroButton btnClearLog;
         private MetroFramework.Controls.MetroLabel metroLabel12;
         private MetroFramework.Controls.MetroLabel metroLabel11;
+        private System.Windows.Forms.PictureBox pictureBox5;
+        private System.Windows.Forms.PictureBox pictureBox4;
+        private MetroFramework.Controls.MetroLabel metroLabel16;
+        private MetroFramework.Controls.MetroLabel metroLabel15;
+        private MetroFramework.Controls.MetroLabel metroLabel14;
+        private MetroFramework.Controls.MetroLabel metroLabel13;
     }
 }

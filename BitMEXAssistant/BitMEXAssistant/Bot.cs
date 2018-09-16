@@ -18,6 +18,7 @@ using MetroFramework.Forms;
 using System.Globalization;
 using System.Reflection;
 
+#pragma warning disable CS1634, CS0168, CS0414
 namespace BitMEXAssistant
 {
     public partial class Bot : MetroForm
@@ -104,10 +105,11 @@ namespace BitMEXAssistant
             while (!Login.APIValid)
             {
                 Login.ShowDialog();
-                if (Login.FormClosed)
+                if (Login.DialogClosed)
                 {
                     this.Close();
                 }
+                Thread.Sleep(0);
             }
 
 
