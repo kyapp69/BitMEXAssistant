@@ -20,7 +20,7 @@ Constantly working on updates, check the issues tab to see items that are potent
 9. Live assisted Trailing Stops with Limit and Market Orders
 
 ## Install
-You can find the installation file at https://github.com/BigBlueBit/BitMEXAssistant/tree/master/Install.
+You can find the installation file at https://github.com/kyapp69/BitMEXAssistant/tree/master/Install.
 
 ## Video Series
 Please view the video series for the journey of this application.  Start at the beginning and understand everything, or find a video pertaining to a particular area of the application you are interested.  The entire journey is being documented in this video library tutorial.

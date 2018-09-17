@@ -1881,7 +1881,7 @@ namespace BitMEXAssistant
         private void tmrLimitNowBuy_Tick(object sender, EventArgs e)
         {
             List<Order> LimitNowOrderResult = LimitNowAmendBuying();
-
+            LimitNowBuyOrders = LimitNowOrderResult;
             // Timer should stop if there are no orders left to amend.
             if (LimitNowOrderResult.Any())
             {
@@ -2099,7 +2099,7 @@ namespace BitMEXAssistant
         {
             //Console.WriteLine("Checking to see if the order has completely filled");
             List<Order> LimitNowOrderResult = LimitNowAmendSelling();
-
+            LimitNowSellOrders = LimitNowOrderResult;
             // Timer should stop if there are no orders left to amend.
             if (LimitNowOrderResult.Any())
             {
@@ -2113,6 +2113,7 @@ namespace BitMEXAssistant
                 // Order no longer available, stop it
                 LimitNowStopSelling();
             }
+
         }
 
         bool CheckOrderPrices(List<Order> orders, Decimal price)
@@ -2121,9 +2122,13 @@ namespace BitMEXAssistant
                 return false;
             for (int i = 0; i < orders.Count; i++)
             {
-                if (orders[i].Price != price)
+                if (orders[i].Price != price && orders.Count == 1)
                 {
                     //Log("Price changed:" + orders[i].Price + "=>" + price);
+                    return true;
+                }
+                else if (orders[i].Price != price && orders[i].ContingencyType == "OneTriggersTheOther")
+                {
                     return true;
                 }
             }
