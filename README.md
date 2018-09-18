@@ -8,10 +8,10 @@ This version is continually being worked on.
 For feature request please join the discord group.
 
 Donate and help fund the improvement of this version of the tool
-![alt text](https://ibb.co/dRnmpz "Donate to help fund and improve the current version")
+![alt text](https://image.ibb.co/dvvvhK/qr_ky_1.png "Donate to help fund and improve the current version")
 
 Donate and help a deribit version of this tool
-![alt text](https://ibb.co/fCUXUz "Donate and help fund a deribit version")
+![alt text](https://image.ibb.co/d9282K/qr_ky_deribit.png "Donate and help fund a deribit version")
 
 
 
