@@ -51,7 +51,7 @@ namespace BitMEXAssistant
         Dictionary<string, decimal> Prices = new Dictionary<string, decimal>();
         //List<Alert> Alerts = new List<Alert>();
 
-        public static string Version = "0.0.18";
+        public static string Version = "0.0.19";
 
         string LimitNowBuyOrderId = "";
         decimal LimitNowBuyOrderPrice = 0;
@@ -2940,6 +2940,11 @@ namespace BitMEXAssistant
         {
             LogLines.Clear();
             ConsoleText.Lines = null;
+        }
+
+        private void lblNetworkAndVersion_Click(object sender, EventArgs e)
+        {
+
         }
     }
 

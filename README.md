@@ -6,9 +6,12 @@ This is a fork from the original project as BigBits haven't had time to improve 
 
 This version is continually being worked on. 
 For feature request please join the discord group.
-https://ibb.co/dRnmpz
 
-https://ibb.co/fCUXUz
+Donate and help fund the improvement of this version of the tool
+![alt text](https://ibb.co/dRnmpz "Donate to help fund and improve the current version")
+
+Donate and help a deribit version of this tool
+![alt text](https://ibb.co/fCUXUz "Donate and help fund a deribit version")
 
 
 

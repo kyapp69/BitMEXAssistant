@@ -3247,6 +3247,7 @@
             this.lblNetworkAndVersion.TabIndex = 23;
             this.lblNetworkAndVersion.Text = "metroLabel2";
             this.lblNetworkAndVersion.UseStyleColors = true;
+            this.lblNetworkAndVersion.Click += new System.EventHandler(this.lblNetworkAndVersion_Click);
             // 
             // pnlPosition
             // 
