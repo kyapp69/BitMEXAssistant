@@ -4,6 +4,7 @@ using CsvHelper;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Timers;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -24,6 +25,8 @@ namespace BitMEXAssistant
     public partial class Bot : MetroForm
     {
         #region Class Properties
+
+        bool FirstLoad = true;
         string APIKey = "";
         string APISecret = "";
         BitMEXApi bitmex;
@@ -88,6 +91,10 @@ namespace BitMEXAssistant
 
         int LimitNowBuyLevel = 0;
         int LimitNowSellLevel = 0;
+
+        // reconnect timers
+        System.Timers.Timer GeneralWS_ReconnectTimer = new System.Timers.Timer();
+        System.Timers.Timer UserWS_ReconnectTimer = new System.Timers.Timer();
         #endregion
 
         public Bot()
@@ -122,16 +129,17 @@ namespace BitMEXAssistant
 
 
                 InitializeSymbolInformation();
-                InitializeWebSocket();
                 InitializeDependentSymbolInformation();
                 InitializePostSymbolInfoSettings();
+                
+                InitializeWebSocket();
                 InitializeWalletWebSocket();
 
                 InitializeVideoPlaylist();
 
 
                 tmrClientUpdates.Start(); // Start our client update timer
-
+                Heartbeat.Start();
                 
             }
 
@@ -173,7 +181,13 @@ namespace BitMEXAssistant
         {
             if (ws_general != null)
             {
+                ws_general.OnClose -= GeneralWebSocketOnClose;
                 ws_general.Close(); // Make sure our websocket is closed.
+            }
+            if (ws_user != null)
+            {
+                ws_user.OnClose -= UserWebSocketOnClose;
+                ws_user.Close(); // Make sure our websocket is closed.
             }
         }
         #endregion
@@ -192,11 +206,32 @@ namespace BitMEXAssistant
         #endregion
 
         #region Initialization
+        private void GeneralWebSocketOnClose(object sender,CloseEventArgs args)
+        {
+            Console.WriteLine("General websocket closed:Starting Reconnect timer");
+            // if it hits here then network was interrupted
+            GeneralWS_ReconnectTimer.Interval = 2000; // reconnect in 1 sec
+            GeneralWS_ReconnectTimer.AutoReset = false;
+            GeneralWS_ReconnectTimer.Start();
+        }
+
+        private void UserWebSocketOnClose(object sender, CloseEventArgs args)
+        {
+            Console.WriteLine("User websocket closed:Starting Reconnect timer");
+            // if it hits here then network was interupted
+            UserWS_ReconnectTimer.Interval = 2000; // reconnect in 1 sec
+            UserWS_ReconnectTimer.AutoReset = false;
+            UserWS_ReconnectTimer.Start();
+        }
+
         private void InitializeWebSocket()
         {
             Log("Initializing Websockets");
+            
             OnTradeUpdate += LimitNow_TradeUpdate;
             OnOrderUpdate += LimitNow_OrderUpdate;
+
+            //ActiveInstrument = bitmex.GetInstrument(((Instrument)ddlSymbol.SelectedItem).Symbol)[0];
 
             // we also start the limitnow update threads over here
             AmendBuyThread = new Thread(LimitNowAmendBuyThreadAction);
@@ -214,6 +249,10 @@ namespace BitMEXAssistant
                 ws_user = new WebSocket("wss://testnet.bitmex.com/realtime");
             }
 
+            GeneralWS_ReconnectTimer.Elapsed += (sender, e) =>
+            {
+                ws_general.Connect();
+            };
             ws_general.OnMessage += (sender, e) =>
             {
                 //Log("On message");
@@ -433,10 +472,23 @@ namespace BitMEXAssistant
             };
             ws_general.OnError += (sender, e) =>
             {
+                Console.WriteLine("General Websocket on Error");
             };
-
+            ws_general.OnClose += GeneralWebSocketOnClose;
+            ws_general.OnOpen += (sender, e) =>
+            {
+                Console.WriteLine("General websocket on open");
+                string APIExpires = bitmex.GetExpiresArg();
+                string Signature = bitmex.GetWebSocketSignatureString(APISecret, APIExpires);
+                ws_general.Send("{\"op\": \"authKeyExpires\", \"args\": [\"" + APIKey + "\", " + APIExpires + ", \"" + Signature + "\"]}");
+                IntializeGeneralWS(FirstLoad);
+            };
             ws_general.Connect();
 
+            UserWS_ReconnectTimer.Elapsed += (sender, e) =>
+            {
+                ws_user.Connect();
+            };
             ws_user.OnMessage += (sender, e) =>
             {
                 WebScocketLastMessage = DateTime.UtcNow;
@@ -621,18 +673,28 @@ namespace BitMEXAssistant
             };
             ws_user.OnError += (sender, e) =>
             {
+                Console.WriteLine("User Websocket on Error");
             };
-
+            ws_user.OnClose += UserWebSocketOnClose;
+            ws_user.OnOpen += (sender, e) =>
+            {
+                Console.WriteLine("User websocket on open");
+                string APIExpires = bitmex.GetExpiresArg();
+                string Signature = bitmex.GetWebSocketSignatureString(APISecret, APIExpires);
+                ws_user.Send("{\"op\": \"authKeyExpires\", \"args\": [\"" + APIKey + "\", " + APIExpires + ", \"" + Signature + "\"]}");
+                InitializeUserWS(FirstLoad);
+            };
             ws_user.Connect();
-
+            /*
             // Authenticate the API
             string APIExpires = bitmex.GetExpiresArg();
             string Signature = bitmex.GetWebSocketSignatureString(APISecret, APIExpires);
             ws_general.Send("{\"op\": \"authKeyExpires\", \"args\": [\"" + APIKey + "\", " + APIExpires + ", \"" + Signature + "\"]}");
             ws_user.Send("{\"op\": \"authKeyExpires\", \"args\": [\"" + APIKey + "\", " + APIExpires + ", \"" + Signature + "\"]}");
-
+            */
             //// Chat Connect
             //ws.Send("{\"op\": \"subscribe\", \"args\": [\"chat\"]}");
+            FirstLoad = false;
 
         }
 
@@ -676,7 +738,7 @@ namespace BitMEXAssistant
             }
         }
 
-        private void InitializeSymbolSpecificData(bool FirstLoad = false)
+        private void IntializeGeneralWS(bool FirstLoad = false)
         {
             if (!FirstLoad)
             {
@@ -686,9 +748,56 @@ namespace BitMEXAssistant
                 ws_general.Send("{\"op\": \"unsubscribe\", \"args\": [\"trade:" + ActiveInstrument.Symbol + "\"]}");
                 OrderBookTopAsks = new List<OrderBook>();
                 OrderBookTopBids = new List<OrderBook>();
+            }
+            // Subscribe to new orderbook
+            ws_general.Send("{\"op\": \"subscribe\", \"args\": [\"orderBook10:" + ActiveInstrument.Symbol + "\"]}");
+            ws_general.Send("{\"op\": \"subscribe\", \"args\": [\"orderBookL2:" + ActiveInstrument.Symbol + "\"]}");
+            // Only subscribing to this symbol trade feed now, was too much at once before with them all.
+            ws_general.Send("{\"op\": \"subscribe\", \"args\": [\"trade:" + ActiveInstrument.Symbol + "\"]}");
+            UpdateFormsForTickSize(ActiveInstrument.TickSize, ActiveInstrument.DecimalPlacesInTickSize);
+            Console.WriteLine("ReInitialized General websocket");
+        }
 
+        private void InitializeUserWS(bool FirstLoad = false)
+        {
+            if (!FirstLoad)
+            {
                 // Unsubscribe from old instrument position
                 ws_user.Send("{\"op\": \"unsubscribe\", \"args\": [\"position:" + ActiveInstrument.Symbol + "\"]}");
+            }
+            // Subscribe to position for new symbol
+            ws_user.Send("{\"op\": \"subscribe\", \"args\": [\"order\",\"wallet\",\"execution\"]}");
+            if (FirstLoad)
+            {
+                ws_user.Send("{\"op\": \"subscribe\", \"args\": [\"order\",\"wallet\",\"execution\"]}");
+            }
+            Console.WriteLine("ReInitialized User websocket");
+        }
+        private void InitializeSymbolSpecificData(bool FirstLoad = false)
+        {
+
+            if (ActiveInstrument.Symbol == null)
+            {
+                return;
+            }
+            if (ws_general == null)
+                return;
+            if (ws_user == null)
+                return;
+            if (!FirstLoad)
+            {
+                if (ActiveInstrument.Symbol!=null)
+                {
+                    // Unsubscribe from old orderbook
+                    ws_general.Send("{\"op\": \"unsubscribe\", \"args\": [\"orderBook10:" + ActiveInstrument.Symbol + "\"]}");
+                    ws_general.Send("{\"op\": \"unsubscribe\", \"args\": [\"orderBookL2:" + ActiveInstrument.Symbol + "\"]}");
+                    ws_general.Send("{\"op\": \"unsubscribe\", \"args\": [\"trade:" + ActiveInstrument.Symbol + "\"]}");
+                    OrderBookTopAsks = new List<OrderBook>();
+                    OrderBookTopBids = new List<OrderBook>();
+
+                    // Unsubscribe from old instrument position
+                    ws_user.Send("{\"op\": \"unsubscribe\", \"args\": [\"position:" + ActiveInstrument.Symbol + "\"]}");
+                }
 
 
                 ActiveInstrument = bitmex.GetInstrument(((Instrument)ddlSymbol.SelectedItem).Symbol)[0];
@@ -700,7 +809,7 @@ namespace BitMEXAssistant
             // Only subscribing to this symbol trade feed now, was too much at once before with them all.
             ws_general.Send("{\"op\": \"subscribe\", \"args\": [\"trade:" + ActiveInstrument.Symbol + "\"]}");
             // Subscribe to position for new symbol
-            ws_user.Send("{\"op\": \"subscribe\", \"args\": [\"position:" + ActiveInstrument.Symbol + "\"]}");
+            ws_user.Send("{\"op\": \"subscribe\", \"args\": [\"order\",\"wallet\",\"execution\"]}");
             if (FirstLoad)
             {
                 ws_user.Send("{\"op\": \"subscribe\", \"args\": [\"order\",\"wallet\",\"execution\"]}");
@@ -850,7 +959,7 @@ namespace BitMEXAssistant
                 UpdateNetworkAndVersion();
 
                 // Start our HeartBeat
-                Heartbeat.Start();
+                //Heartbeat.Start();
             }
             catch (Exception ex)
             {
@@ -937,32 +1046,35 @@ namespace BitMEXAssistant
         private void UpdateFormsForTickSize(decimal TickSize, int Decimals)
         {
             Log("Current Tick size:" + TickSize + ":" + Decimals);
-            nudPositionLimitPrice.DecimalPlaces = Decimals;
-            nudPositionLimitPrice.Increment = TickSize;
+            nudPositionLimitPrice.Invoke((MethodInvoker)(()=>
+                {
+                    nudPositionLimitPrice.DecimalPlaces = Decimals;
+                    nudPositionLimitPrice.Increment = TickSize;
 
-            nudSpreadBuyValueApart.DecimalPlaces = Decimals;
-            nudSpreadBuyValueApart.Increment = TickSize;
-            nudSpreadBuyValueApart.Value = Math.Round(nudSpreadBuyValueApart.Value, Decimals);
+                    nudSpreadBuyValueApart.DecimalPlaces = Decimals;
+                    nudSpreadBuyValueApart.Increment = TickSize;
+                    nudSpreadBuyValueApart.Value = Math.Round(nudSpreadBuyValueApart.Value, Decimals);
 
-            nudSpreadSellValueApart.DecimalPlaces = Decimals;
-            nudSpreadSellValueApart.Increment = TickSize;
-            nudSpreadSellValueApart.Value = Math.Round(nudSpreadSellValueApart.Value, Decimals);
+                    nudSpreadSellValueApart.DecimalPlaces = Decimals;
+                    nudSpreadSellValueApart.Increment = TickSize;
+                    nudSpreadSellValueApart.Value = Math.Round(nudSpreadSellValueApart.Value, Decimals);
 
-            nudCurrentPrice.DecimalPlaces = Decimals;
-            nudCurrentPrice.Increment = TickSize;
-            nudCurrentPrice.Controls[0].Enabled = false;
-            nudCurrentPrice.Value = Math.Round(nudCurrentPrice.Value, Decimals);
+                    nudCurrentPrice.DecimalPlaces = Decimals;
+                    nudCurrentPrice.Increment = TickSize;
+                    nudCurrentPrice.Controls[0].Enabled = false;
+                    nudCurrentPrice.Value = Math.Round(nudCurrentPrice.Value, Decimals);
 
-            nudManualLimitPrice.DecimalPlaces = Decimals;
-            nudManualLimitPrice.Increment = TickSize;
+                    nudManualLimitPrice.DecimalPlaces = Decimals;
+                    nudManualLimitPrice.Increment = TickSize;
 
-            nudStopTrailingTrail.DecimalPlaces = Decimals;
-            nudStopTrailingTrail.Increment = TickSize;
-            nudStopTrailingTrail.Value = Math.Round(nudStopTrailingTrail.Value, Decimals);
+                    nudStopTrailingTrail.DecimalPlaces = Decimals;
+                    nudStopTrailingTrail.Increment = TickSize;
+                    nudStopTrailingTrail.Value = Math.Round(nudStopTrailingTrail.Value, Decimals);
 
-            nudStopTrailingLimitOffset.DecimalPlaces = Decimals;
-            nudStopTrailingLimitOffset.Increment = TickSize;
-            nudStopTrailingLimitOffset.Value = Math.Round(nudStopTrailingLimitOffset.Value, Decimals);
+                    nudStopTrailingLimitOffset.DecimalPlaces = Decimals;
+                    nudStopTrailingLimitOffset.Increment = TickSize;
+                    nudStopTrailingLimitOffset.Value = Math.Round(nudStopTrailingLimitOffset.Value, Decimals);
+                }));
         }
 
         private void ddlCandleTimes_SelectedIndexChanged(object sender, EventArgs e)
@@ -2075,7 +2187,7 @@ namespace BitMEXAssistant
                         orders.Add(order);
                     }
                     string orderlist = JsonConvert.SerializeObject(orders);
-                    Console.WriteLine("Amend Selling orders:" + orderlist+":"+Price);
+                    //Console.WriteLine("Amend Selling orders:" + orderlist+":"+Price);
                     string res = bitmex.AmendBulkOrder(orderlist);
                     //Console.WriteLine("Amend Selling return:" + res);
                     if (res.Contains("Error"))

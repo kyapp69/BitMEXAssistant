@@ -2,6 +2,16 @@
 
 Constantly working on updates, check the issues tab to see items that are potential work items.
 
+This is a fork from the original project as BigBits haven't had time to improve on his version.
+
+This version is continually being worked on. 
+For feature request please join the discord group.
+https://ibb.co/dRnmpz
+
+https://ibb.co/fCUXUz
+
+
+
 ![alt text](https://i.imgur.com/KsO31kL.png "Desktop Shortcut")
 
 ![alt text](https://i.imgur.com/HqPpJLJ.png "API Login")
