@@ -1014,8 +1014,35 @@ namespace BitMEX
         }
 
 
-#endregion
+        #endregion
 
+
+        public List<Instrument> GetAllInstruments()
+        {
+            string res = Query("GET", "/instrument?columns=symbol,tickSize&start=0&count=500");
+            int RetryAttemptCount = 0;
+            int MaxRetries = RetryAttempts(res);
+            while (res.Contains("error") && RetryAttemptCount < MaxRetries)
+            {
+                errors.Add(res);
+                Thread.Sleep(BitMEXAssistant.Properties.Settings.Default.RetryAttemptWaitTime); // Force app to wait 500ms
+                res = Query("GET", "/instrument/active");
+                RetryAttemptCount++;
+                if (RetryAttemptCount == MaxRetries)
+                {
+                    errors.Add("Max rety attempts of " + MaxRetries.ToString() + " reached.");
+                    break;
+                }
+            }
+            try
+            {
+                return JsonConvert.DeserializeObject<List<Instrument>>(res);
+            }
+            catch (Exception ex)
+            {
+                return new List<Instrument>();
+            }
+        }
 
         public List<Instrument> GetActiveInstruments()
         {

@@ -34,7 +34,9 @@ namespace BitMEXAssistant
         string APISecret = "";
         BitMEXApi bitmex;
         List<Instrument> ActiveInstruments = new List<Instrument>();
+        List<Instrument> AllInstruments = new List<Instrument>();
         Instrument ActiveInstrument = new Instrument();
+        int ActiveInstrumentIndex = 0;
         string Timeframe = "1m";
         bool RealNetwork = false;
 
@@ -235,6 +237,12 @@ namespace BitMEXAssistant
             UserWS_ReconnectTimer.AutoReset = false;
             UserWS_ReconnectTimer.Start();
         }
+
+        private int InstrumentIndex(string symbol)
+        {
+            int index = AllInstruments.FindIndex(x => x.Symbol == symbol);
+            return index;
+        }
         private void InitializeWebSocket()
         {
             Log("Initializing Websockets");
@@ -406,6 +414,19 @@ namespace BitMEXAssistant
                                             OrderBookL2Bids.Add(ID, OBI);
                                         }
                                     }
+                                    long IDt = OrderBookL2Bids.ElementAt(0).Key;
+                                    decimal Price;
+                                    decimal l1 = (decimal)100000000 * (decimal)ActiveInstrumentIndex;
+                                    decimal l2 = l1 - (decimal)IDt;
+                                    decimal tickSize = ActiveInstrument.TickSize;
+                                    if (ActiveInstrument.Symbol == "XBTUSD")
+                                    {
+                                        tickSize = 0.01M;
+                                    }
+                                    Price = l2 * tickSize;
+                                    //Console.WriteLine("Top bids:"+Price);
+
+
                                 }
                                 else if ((string)Message["action"] == "delete")
                                 {
@@ -445,6 +466,16 @@ namespace BitMEXAssistant
                                     foreach (JObject i in TD)
                                     {
                                         long ID = (long)i["id"];
+                                        decimal Price;
+                                        decimal l1 = (decimal)100000000 * (decimal)ActiveInstrumentIndex;
+                                        decimal l2 = l1 - (decimal)ID;
+                                        decimal tickSize = ActiveInstrument.TickSize;
+                                        if (ActiveInstrument.Symbol == "XBTUSD")
+                                        {
+                                            tickSize = 0.01M;
+                                        }
+                                        Price = l2 * tickSize;
+                                        //Console.WriteLine("Updating "+ (string)i["side"] + " Price Level:" + Price +"("+ (int)i["size"] +")");
                                         if ((string)i["side"] == "Sell")
                                         {
                                             if (OrderBookL2Asks.ContainsKey(ID))
@@ -928,6 +959,7 @@ namespace BitMEXAssistant
             ws_general.Send("{\"op\": \"subscribe\", \"args\": [\"trade:" + ActiveInstrument.Symbol + "\"]}");
             UpdateFormsForTickSize(ActiveInstrument.TickSize, ActiveInstrument.DecimalPlacesInTickSize);
             Console.WriteLine("ReInitialized General websocket");
+            ActiveInstrumentIndex = InstrumentIndex(ActiveInstrument.Symbol);
         }
 
         private void InitializeUserWS(bool FirstLoad = false)
@@ -976,8 +1008,8 @@ namespace BitMEXAssistant
                     ws_user.Send("{\"op\": \"unsubscribe\", \"args\": [\"position:" + ActiveInstrument.Symbol + "\"]}");
                 }
 
-
                 ActiveInstrument = bitmex.GetInstrument(((Instrument)ddlSymbol.SelectedItem).Symbol)[0];
+                ActiveInstrumentIndex = InstrumentIndex(ActiveInstrument.Symbol);
             }
 
             // Subscribe to new orderbook
@@ -1147,6 +1179,7 @@ namespace BitMEXAssistant
 
         private void InitializeSymbolInformation()
         {
+            AllInstruments = bitmex.GetAllInstruments();
             ActiveInstruments = bitmex.GetActiveInstruments().OrderByDescending(a => a.Volume24H).ToList();
             // Assemble our price dictionary
             foreach (Instrument i in ActiveInstruments)
@@ -1161,6 +1194,7 @@ namespace BitMEXAssistant
             ddlSymbol.DisplayMember = "Symbol";
             ddlSymbol.SelectedIndex = 0;
             ActiveInstrument = ActiveInstruments[0];
+            ActiveInstrumentIndex = InstrumentIndex(ActiveInstrument.Symbol);
 
             InitializeSymbolSpecificData(true);
         }
