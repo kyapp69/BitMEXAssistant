@@ -1,4 +1,6 @@
 ﻿#define USE_SEPARATE_THREADS
+#define USE_LOCALTIME
+#define USE_L2
 using BitMEX;
 using CsvHelper;
 using Newtonsoft.Json;
@@ -26,6 +28,7 @@ namespace BitMEXAssistant
     {
         #region Class Properties
 
+        double heartbeatcheck = 5; // seconds after the last message to send a ping
         bool FirstLoad = true;
         string APIKey = "";
         string APISecret = "";
@@ -47,11 +50,12 @@ namespace BitMEXAssistant
         WebSocket ws_general;
         WebSocket ws_user;
 
-        DateTime WebScocketLastMessage = new DateTime();
+        DateTime GeneralWebScocketLastMessage = new DateTime();
+        DateTime UserWebScocketLastMessage = new DateTime();
         Dictionary<string, decimal> Prices = new Dictionary<string, decimal>();
         //List<Alert> Alerts = new List<Alert>();
 
-        public static string Version = "0.0.19";
+        public static string Version = "0.0.20";
 
         string LimitNowBuyOrderId = "";
         decimal LimitNowBuyOrderPrice = 0;
@@ -61,6 +65,13 @@ namespace BitMEXAssistant
         List<OrderBook> OrderBookTopBids = new List<OrderBook>();
         Position SymbolPosition = new Position();
         decimal Balance = 0;
+
+        #region L2
+        bool L2Initialized = false;
+        SortedDictionary<long, OrderBook> OrderBookL2Asks = new SortedDictionary<long, OrderBook>(Comparer<long>.Create((x, y) => y.CompareTo(x)));
+        SortedDictionary<long, OrderBook> OrderBookL2Bids = new SortedDictionary<long, OrderBook>();
+        #endregion L2
+
 
         string TrailingStopMethod = "Limit";
 
@@ -209,6 +220,7 @@ namespace BitMEXAssistant
         private void GeneralWebSocketOnClose(object sender,CloseEventArgs args)
         {
             Console.WriteLine("General websocket closed:Starting Reconnect timer");
+            L2Initialized = false;
             // if it hits here then network was interrupted
             GeneralWS_ReconnectTimer.Interval = 2000; // reconnect in 1 sec
             GeneralWS_ReconnectTimer.AutoReset = false;
@@ -223,7 +235,6 @@ namespace BitMEXAssistant
             UserWS_ReconnectTimer.AutoReset = false;
             UserWS_ReconnectTimer.Start();
         }
-
         private void InitializeWebSocket()
         {
             Log("Initializing Websockets");
@@ -256,9 +267,11 @@ namespace BitMEXAssistant
             ws_general.OnMessage += (sender, e) =>
             {
                 //Log("On message");
-                WebScocketLastMessage = DateTime.UtcNow;
+                GeneralWebScocketLastMessage = DateTime.UtcNow;
                 try
                 {
+                    if (e.Data == "pong")
+                        return;
                     JObject Message = JObject.Parse(e.Data);
                     //Console.WriteLine("General Websocket Message:" + e.Data);
                     if (Message.ContainsKey("table"))
@@ -353,6 +366,158 @@ namespace BitMEXAssistant
                                             Console.WriteLine("Exception OnOrder");
                                         }
                                     }
+                                }
+                            }
+                        }
+                        else if ((string)Message["table"] == "orderBookL2")
+                        {
+                            /*
+                            Console.WriteLine("L2:"+e.Data);
+                            if (Message.ContainsKey("data"))
+                            {
+                                Console.WriteLine("OBL2 Data:"+ Message["data"]);
+                            }
+                            */
+                            try
+                            {
+                                if ((string)Message["action"] != "partial" && !L2Initialized)
+                                {
+                                    return;
+                                }
+                                if ((string)Message["action"] == "partial")
+                                {
+                                    Console.WriteLine("L2 Initializing/ReInitialize");
+                                    L2Initialized = true;
+                                    OrderBookL2Asks.Clear();
+                                    OrderBookL2Bids.Clear();
+                                    JArray TD = (JArray)Message["data"];
+                                    foreach (JObject i in TD)
+                                    {
+                                        OrderBook OBI = new OrderBook();
+                                        OBI.Price = (decimal)i["price"];
+                                        OBI.Size = (int)i["size"];
+                                        long ID = (long)i["id"];
+                                        if ((string)i["side"] == "Sell")
+                                        {
+                                            OrderBookL2Asks.Add(ID, OBI);
+                                        }
+                                        else if ((string)i["side"] == "Buy")
+                                        {
+                                            OrderBookL2Bids.Add(ID, OBI);
+                                        }
+                                    }
+                                }
+                                else if ((string)Message["action"] == "delete")
+                                {
+                                    //Console.WriteLine("L2 delete");
+                                    JArray TD = (JArray)Message["data"];
+                                    foreach (JObject i in TD)
+                                    {
+                                        long ID = (long)i["id"];
+                                        if ((string)i["side"] == "Sell")
+                                        {
+                                            if (OrderBookL2Asks.ContainsKey(ID))
+                                            {
+                                                OrderBookL2Asks.Remove(ID);
+                                            }
+                                            else
+                                            {
+                                                Console.WriteLine("Unable to find record L2 Ask");
+                                            }
+                                        }
+                                        else if ((string)i["side"] == "Buy")
+                                        {
+                                            if (OrderBookL2Bids.ContainsKey(ID))
+                                            {
+                                                OrderBookL2Bids.Remove(ID);
+                                            }
+                                            else
+                                            {
+                                                Console.WriteLine("Unable to find record L2 Bids");
+                                            }
+                                        }
+                                    }
+                                }
+                                else if ((string)Message["action"] == "update")
+                                {
+                                    //Console.WriteLine("L2 update");
+                                    JArray TD = (JArray)Message["data"];
+                                    foreach (JObject i in TD)
+                                    {
+                                        long ID = (long)i["id"];
+                                        if ((string)i["side"] == "Sell")
+                                        {
+                                            if (OrderBookL2Asks.ContainsKey(ID))
+                                            {
+                                                OrderBookL2Asks[ID].Size = (int)i["size"];
+                                            }
+                                            else
+                                            {
+                                                Console.WriteLine("Unable to find record L2 Ask");
+                                            }
+                                        }
+                                        else if ((string)i["side"] == "Buy")
+                                        {
+                                            if (OrderBookL2Bids.ContainsKey(ID))
+                                            {
+                                                OrderBookL2Bids[ID].Size = (int)i["size"];
+                                            }
+                                            else
+                                            {
+                                                Console.WriteLine("Unable to find record L2 Bids");
+                                            }
+                                        }
+                                    }
+                                }
+                                else if ((string)Message["action"] == "insert")
+                                {
+                                    //Console.WriteLine("L2 insert");
+                                    JArray TD = (JArray)Message["data"];
+                                    foreach (JObject i in TD)
+                                    {
+                                        OrderBook OBI = new OrderBook();
+                                        OBI.Price = (decimal)i["price"];
+                                        OBI.Size = (int)i["size"];
+                                        long ID = (long)i["id"];
+                                        if ((string)i["side"] == "Sell")
+                                        {
+                                            if (OrderBookL2Asks.ContainsKey(ID))
+                                            {
+                                                Console.WriteLine("L2 Asks already contains key");
+                                            }
+                                            else
+                                            {
+                                                OrderBookL2Asks.Add(ID, OBI);
+                                            }
+                                        }
+                                        else if ((string)i["side"] == "Buy")
+                                        {
+                                            if (OrderBookL2Bids.ContainsKey(ID))
+                                            {
+                                                Console.WriteLine("L2 Bids already contains key");
+                                            }
+                                            else
+                                            {
+                                                OrderBookL2Bids.Add(ID, OBI);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            catch (Exception l2)
+                            {
+                                Console.WriteLine("L2 exception");
+                            }
+                            //Console.WriteLine("L2: Action:" + Message["action"]);
+                            if (OnOrderUpdate != null)
+                            {
+                                try
+                                {
+                                    OnOrderUpdate(this, EventArgs.Empty);
+                                }
+                                catch (Exception OnOrderException)
+                                {
+                                    Console.WriteLine("Exception OnOrder");
                                 }
                             }
                         }
@@ -491,9 +656,11 @@ namespace BitMEXAssistant
             };
             ws_user.OnMessage += (sender, e) =>
             {
-                WebScocketLastMessage = DateTime.UtcNow;
+                UserWebScocketLastMessage = DateTime.UtcNow;
                 try
                 {
+                    if (e.Data == "pong")
+                        return;
                     JObject Message = JObject.Parse(e.Data);
                     //Console.WriteLine("User Websocket Message:" + e.Data);
                     if (Message.ContainsKey("table"))
@@ -740,17 +907,22 @@ namespace BitMEXAssistant
 
         private void IntializeGeneralWS(bool FirstLoad = false)
         {
+            L2Initialized = false;
             if (!FirstLoad)
             {
                 // Unsubscribe from old orderbook
+#if !USE_L2
                 ws_general.Send("{\"op\": \"unsubscribe\", \"args\": [\"orderBook10:" + ActiveInstrument.Symbol + "\"]}");
+#endif
                 ws_general.Send("{\"op\": \"unsubscribe\", \"args\": [\"orderBookL2:" + ActiveInstrument.Symbol + "\"]}");
                 ws_general.Send("{\"op\": \"unsubscribe\", \"args\": [\"trade:" + ActiveInstrument.Symbol + "\"]}");
                 OrderBookTopAsks = new List<OrderBook>();
                 OrderBookTopBids = new List<OrderBook>();
             }
             // Subscribe to new orderbook
+#if !USE_L2
             ws_general.Send("{\"op\": \"subscribe\", \"args\": [\"orderBook10:" + ActiveInstrument.Symbol + "\"]}");
+#endif
             ws_general.Send("{\"op\": \"subscribe\", \"args\": [\"orderBookL2:" + ActiveInstrument.Symbol + "\"]}");
             // Only subscribing to this symbol trade feed now, was too much at once before with them all.
             ws_general.Send("{\"op\": \"subscribe\", \"args\": [\"trade:" + ActiveInstrument.Symbol + "\"]}");
@@ -784,12 +956,17 @@ namespace BitMEXAssistant
                 return;
             if (ws_user == null)
                 return;
+
+            L2Initialized = false;
+
             if (!FirstLoad)
             {
                 if (ActiveInstrument.Symbol!=null)
                 {
                     // Unsubscribe from old orderbook
+#if !USE_L2
                     ws_general.Send("{\"op\": \"unsubscribe\", \"args\": [\"orderBook10:" + ActiveInstrument.Symbol + "\"]}");
+#endif
                     ws_general.Send("{\"op\": \"unsubscribe\", \"args\": [\"orderBookL2:" + ActiveInstrument.Symbol + "\"]}");
                     ws_general.Send("{\"op\": \"unsubscribe\", \"args\": [\"trade:" + ActiveInstrument.Symbol + "\"]}");
                     OrderBookTopAsks = new List<OrderBook>();
@@ -804,7 +981,9 @@ namespace BitMEXAssistant
             }
 
             // Subscribe to new orderbook
+#if !USE_L2
             ws_general.Send("{\"op\": \"subscribe\", \"args\": [\"orderBook10:" + ActiveInstrument.Symbol + "\"]}");
+#endif
             ws_general.Send("{\"op\": \"subscribe\", \"args\": [\"orderBookL2:" + ActiveInstrument.Symbol + "\"]}");
             // Only subscribing to this symbol trade feed now, was too much at once before with them all.
             ws_general.Send("{\"op\": \"subscribe\", \"args\": [\"trade:" + ActiveInstrument.Symbol + "\"]}");
@@ -985,9 +1164,9 @@ namespace BitMEXAssistant
 
             InitializeSymbolSpecificData(true);
         }
-        #endregion
+#endregion
 
-        #region General Tools
+#region General Tools
 
         private void SaveSettings()
         {
@@ -1035,9 +1214,9 @@ namespace BitMEXAssistant
             UpdatePositionInfo();
             //TriggerAlerts();
         }
-        #endregion
+#endregion
 
-        #region Symbol And Time Frame Tools
+#region Symbol And Time Frame Tools
         private void ddlSymbol_SelectedIndexChanged(object sender, EventArgs e)
         {
             InitializeSymbolSpecificData();
@@ -1093,9 +1272,18 @@ namespace BitMEXAssistant
             // Update the time every second.
             UpdateBalanceAndTime();
 
-            if (((TimeSpan)(DateTime.UtcNow - WebScocketLastMessage)).TotalSeconds > 5)
+            if (((TimeSpan)(DateTime.UtcNow - GeneralWebScocketLastMessage)).TotalSeconds > heartbeatcheck)
             {
-                ws_general.Ping();
+                //Console.WriteLine("general websocket send ping");
+                //ws_general.Ping();
+                ws_general.Send("ping");
+            }
+
+            if (((TimeSpan)(DateTime.UtcNow - UserWebScocketLastMessage)).TotalSeconds > heartbeatcheck)
+            {
+                //Console.WriteLine("User websocket send ping");
+                //ws_user.Ping();
+                ws_user.Send("ping");
             }
 
         }
@@ -1106,17 +1294,31 @@ namespace BitMEXAssistant
             try
             {
                 string USDValue = (Prices["XBTUSD"] * Balance).ToString("C", new CultureInfo("en-US"));
-                lblBalanceAndTime.Invoke(new Action(() => lblBalanceAndTime.Text = "Balance: " + Math.Round(Balance, 8).ToString() + " | " + USDValue + "     " + DateTime.UtcNow.ToShortDateString() + " " + DateTime.UtcNow.AddHours(HoursInFuture).ToLongTimeString()));
+                lblBalanceAndTime.Invoke(
+                    new Action(() => lblBalanceAndTime.Text = "Balance: " + Math.Round(Balance, 8).ToString() + " | " + USDValue + "     " +
+#if USE_LOCALTIME
+                    DateTime.Now.ToShortDateString() + " " + DateTime.Now.AddHours(HoursInFuture).ToLongTimeString() + "local"
+#else
+                    DateTime.UtcNow.ToShortDateString() + " " + DateTime.UtcNow.AddHours(HoursInFuture).ToLongTimeString() + "Utc"
+#endif
+                    ));
 
             }
             catch (Exception ex)
             {
-                lblBalanceAndTime.Invoke(new Action(() => lblBalanceAndTime.Text = "Balance: Error     " + DateTime.UtcNow.ToShortDateString() + " " + DateTime.UtcNow.AddHours(HoursInFuture).ToLongTimeString()));
+                lblBalanceAndTime.Invoke(
+                    new Action(() => lblBalanceAndTime.Text = "Balance: Error     " +
+#if USE_LOCALTIME
+                    DateTime.Now.ToShortDateString() + " " + DateTime.Now.AddHours(HoursInFuture).ToLongTimeString() + "local"
+#else
+                    DateTime.UtcNow.ToShortDateString() + " " + DateTime.UtcNow.AddHours(HoursInFuture).ToLongTimeString() + "Utc"
+#endif
+                    ));
             }
         }
-        #endregion
+#endregion
 
-        #region DCA
+#region DCA
         private void UpdateDCASummary()
         {
             DCASelectedSymbol = ActiveInstrument.Symbol;
@@ -1290,9 +1492,9 @@ namespace BitMEXAssistant
             chkDCAExecuteImmediately.Enabled = !Lock;
         }
 
-        #endregion
+#endregion
 
-        #region Position Manager
+#region Position Manager
         private void btnPositionMarketClose_Click(object sender, EventArgs e)
         {
             MarketClosePosition();
@@ -1352,9 +1554,9 @@ namespace BitMEXAssistant
         {
             bitmex.ChangeMargin(ActiveInstrument.Symbol, nudPositionMargin.Value);
         }
-        #endregion
+#endregion
 
-        #region Settings Tab
+#region Settings Tab
         private void chkSettingOverloadRetry_CheckedChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.OverloadRetry = chkSettingOverloadRetry.Checked;
@@ -1372,9 +1574,9 @@ namespace BitMEXAssistant
             Properties.Settings.Default.RetryAttemptWaitTime = (int)nudSettingsRetryWaitTime.Value;
             SaveSettings();
         }
-        #endregion
+#endregion
 
-        #region Spread Orders
+#region Spread Orders
 
         private void nudSpreadBuyOrderCount_ValueChanged(object sender, EventArgs e)
         {
@@ -1567,9 +1769,9 @@ namespace BitMEXAssistant
             return str.ToString();
         }
 
-        #endregion
+#endregion
 
-        #region Export Candles
+#region Export Candles
         private void ExportCandleData()
         {
             // First see if we have the file we want where we want it. To do that, we need to get the filepath to our app folder in my documents
@@ -1726,9 +1928,9 @@ namespace BitMEXAssistant
         {
             ExportCandleData();
         }
-        #endregion
+#endregion
 
-        #region Manual Ordering
+#region Manual Ordering
 
         private void UpdateManualMarketBuyButtons()
         {
@@ -1932,9 +2134,9 @@ namespace BitMEXAssistant
             bitmex.CancelAllOpenOrders(ActiveInstrument.Symbol);
         }
 
-        #endregion
+#endregion
 
-        #region Limit Now
+#region Limit Now
 
         private void LimitNowAmendBuyThreadAction()
         {
@@ -2462,7 +2664,7 @@ namespace BitMEXAssistant
 
         }
 
-        private decimal LimitNowGetOrderPrice(string Side)
+        private decimal LimitNowGetOrderPrice(string Side,bool UseL2 = true)
         {
             decimal Price = Decimal.Zero;
             try
@@ -2472,8 +2674,15 @@ namespace BitMEXAssistant
                     case "Buy":
                         if (LimitNowBuyMethod == "Best Price")
                         {
-                            decimal LowestAsk = OrderBookTopAsks.OrderBy(a => a.Price).FirstOrDefault().Price;
-                            decimal HighestBid = OrderBookTopBids.OrderByDescending(a => a.Price).FirstOrDefault().Price;
+                            decimal LowestAsk = decimal.Zero;
+                            decimal HighestBid = decimal.Zero;
+#if !USE_L2
+                            LowestAsk = OrderBookTopAsks.OrderBy(a => a.Price).FirstOrDefault().Price;
+                            HighestBid = OrderBookTopBids.OrderByDescending(a => a.Price).FirstOrDefault().Price;
+#else                        
+                            LowestAsk = OrderBookL2Asks.ElementAt(0).Value.Price;
+                            HighestBid = OrderBookL2Bids.ElementAt(0).Value.Price;
+#endif
                             if (HighestBid != LimitNowBuyOrderPrice) // Our price isn't the highest in book
                             {
                                 if (LowestAsk - HighestBid > ActiveInstrument.TickSize) // More than 1 tick size spread
@@ -2489,19 +2698,40 @@ namespace BitMEXAssistant
                         }
                         else if (LimitNowBuyMethod == "Quick Fill")
                         {
+#if !USE_L2
                             Price = OrderBookTopAsks.OrderBy(a => a.Price).FirstOrDefault().Price - (ActiveInstrument.TickSize * LimitNowBuyTicksFromCenter);
+#else
+                            Price = OrderBookL2Asks.ElementAt(0).Value.Price - (ActiveInstrument.TickSize * LimitNowBuyTicksFromCenter);
+#endif
                         }
                         else if (LimitNowBuyMethod == "Order Level")
                         {
-                            List<OrderBook> sorted = OrderBookTopBids.OrderByDescending(a => a.Price).ToList();
-                            Price = sorted[LimitNowBuyLevel].Price;
+                            if (!UseL2)
+                            {
+                                List<OrderBook> sorted = OrderBookTopBids.OrderByDescending(a => a.Price).ToList();
+                                if (LimitNowBuyLevel<sorted.Count)
+                                {
+                                    Price = sorted[LimitNowBuyLevel].Price;
+                                }
+                            }
+                            else if (L2Initialized)
+                            {
+                                Price = OrderBookL2Bids.ElementAt(LimitNowBuyLevel).Value.Price;
+                            }
                         }
                         break;
                     case "Sell":
                         if (LimitNowSellMethod == "Best Price")
                         {
-                            decimal LowestAsk = OrderBookTopAsks.OrderBy(a => a.Price).FirstOrDefault().Price;
-                            decimal HighestBid = OrderBookTopBids.OrderByDescending(a => a.Price).FirstOrDefault().Price;
+                            decimal LowestAsk = decimal.Zero;
+                            decimal HighestBid = decimal.Zero;
+#if !USE_L2
+                            LowestAsk = OrderBookTopAsks.OrderBy(a => a.Price).FirstOrDefault().Price;
+                            HighestBid = OrderBookTopBids.OrderByDescending(a => a.Price).FirstOrDefault().Price;
+#else
+                            LowestAsk = OrderBookL2Asks.ElementAt(0).Value.Price;
+                            HighestBid = OrderBookL2Bids.ElementAt(0).Value.Price;
+#endif
                             if (LowestAsk != LimitNowSellOrderPrice) // Our price isn't the highest in book
                             {
                                 if (LowestAsk - HighestBid > ActiveInstrument.TickSize) // More than 1 tick size spread
@@ -2516,12 +2746,26 @@ namespace BitMEXAssistant
                         }
                         else if (LimitNowSellMethod == "Quick Fill")
                         {
+#if !USE_L2
                             Price = OrderBookTopBids.OrderByDescending(a => a.Price).FirstOrDefault().Price + (ActiveInstrument.TickSize * LimitNowSellTicksFromCenter);
+#else
+                            Price = OrderBookL2Bids.ElementAt(0).Value.Price + (ActiveInstrument.TickSize * LimitNowSellTicksFromCenter);
+#endif
                         }
                         else if (LimitNowSellMethod == "Order Level")
                         {
-                            List<OrderBook> sorted = OrderBookTopAsks.OrderBy(a => a.Price).ToList();
-                            Price = sorted[LimitNowSellLevel].Price;
+                            if (!UseL2)
+                            {
+                                List<OrderBook> sorted = OrderBookTopAsks.OrderBy(a => a.Price).ToList();
+                                if (LimitNowSellLevel<sorted.Count)
+                                {
+                                    Price = sorted[LimitNowSellLevel].Price;
+                                }
+                            }
+                            else if (L2Initialized)
+                            {
+                                Price = OrderBookL2Asks.ElementAt(LimitNowSellLevel).Value.Price;
+                            }
                         }
                         break;
                     default:
@@ -2901,6 +3145,8 @@ namespace BitMEXAssistant
             {
                 Log("Sell Order Price:" + OrderPrice);
             }
+            OrderPrice = LimitNowGetOrderPrice("Sell",true);
+            Log("Sell Order Price L2:" + OrderPrice);
         }
 
         private void btnLimitNowCheckPrice_Buy_Click(object sender, EventArgs e)
@@ -2915,6 +3161,8 @@ namespace BitMEXAssistant
             {
                 Log("Buy Order Price:" + OrderPrice);
             }
+            OrderPrice = LimitNowGetOrderPrice("Buy", true);
+            Log("Buy Order Price L2:" + OrderPrice);
         }
 
         private void nudLimitNowBuyLevel_ValueChanged(object sender, EventArgs e)
@@ -2945,6 +3193,11 @@ namespace BitMEXAssistant
         private void lblNetworkAndVersion_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void metroButton1_Click(object sender, EventArgs e)
+        {
+            ws_user.Send("ping");
         }
     }
 

@@ -237,6 +237,7 @@
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.pbxYouTubeSubscribe = new System.Windows.Forms.PictureBox();
+            this.metroButton1 = new MetroFramework.Controls.MetroButton();
             this.TabControl.SuspendLayout();
             this.tabManual.SuspendLayout();
             this.groupBox5.SuspendLayout();
@@ -366,7 +367,7 @@
             this.TabControl.Controls.Add(this.tabVideos);
             this.TabControl.Location = new System.Drawing.Point(0, 125);
             this.TabControl.Name = "TabControl";
-            this.TabControl.SelectedIndex = 7;
+            this.TabControl.SelectedIndex = 1;
             this.TabControl.Size = new System.Drawing.Size(857, 394);
             this.TabControl.Style = MetroFramework.MetroColorStyle.White;
             this.TabControl.TabIndex = 14;
@@ -989,7 +990,7 @@
             // 
             this.nudLimitNowSellLevel.Location = new System.Drawing.Point(6, 97);
             this.nudLimitNowSellLevel.Maximum = new decimal(new int[] {
-            9,
+            15,
             0,
             0,
             0});
@@ -1267,7 +1268,7 @@
             // 
             this.nudLimitNowBuyLevel.Location = new System.Drawing.Point(5, 98);
             this.nudLimitNowBuyLevel.Maximum = new decimal(new int[] {
-            9,
+            15,
             0,
             0,
             0});
@@ -3476,11 +3477,22 @@
             this.pbxYouTubeSubscribe.TabStop = false;
             this.pbxYouTubeSubscribe.Click += new System.EventHandler(this.pbxYouTubeSubscribe_Click);
             // 
+            // metroButton1
+            // 
+            this.metroButton1.Location = new System.Drawing.Point(809, 625);
+            this.metroButton1.Name = "metroButton1";
+            this.metroButton1.Size = new System.Drawing.Size(29, 23);
+            this.metroButton1.TabIndex = 36;
+            this.metroButton1.Text = "Ping";
+            this.metroButton1.UseSelectable = true;
+            this.metroButton1.Click += new System.EventHandler(this.metroButton1_Click);
+            // 
             // Bot
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(861, 657);
+            this.Controls.Add(this.metroButton1);
             this.Controls.Add(this.btnClearLog);
             this.Controls.Add(this.metroLabel10);
             this.Controls.Add(this.metroLabel9);
@@ -3803,5 +3815,6 @@
         private MetroFramework.Controls.MetroLabel metroLabel15;
         private MetroFramework.Controls.MetroLabel metroLabel14;
         private MetroFramework.Controls.MetroLabel metroLabel13;
+        private MetroFramework.Controls.MetroButton metroButton1;
     }
 }
