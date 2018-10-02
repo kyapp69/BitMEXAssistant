@@ -2571,6 +2571,7 @@ namespace BitMEXAssistant
                 bitmex.CancelOrder(LimitNowBuyOrders[i].OrderId);
             }
             LimitNowBuyOrders.Clear();
+            LimitNowBuyOrderPrice = 0;
         }
 
         private void btnLimitNowSellCancel_Click(object sender, EventArgs e)
@@ -2594,6 +2595,7 @@ namespace BitMEXAssistant
                 bitmex.CancelOrder(LimitNowSellOrders[i].OrderId);
             }
             LimitNowSellOrders.Clear();
+            LimitNowSellOrderPrice = 0;
         }
 
         private void LimitNowStopBuying()
@@ -2728,6 +2730,10 @@ namespace BitMEXAssistant
                                     Price = LowestAsk - ActiveInstrument.TickSize;
                                 }
                             }
+                            else
+                            {
+                                Log("Buy Best Price Unable to set Price:Highest bid is the same as asking:" + HighestBid + ":" + LimitNowBuyOrderPrice);
+                            }
 
                         }
                         else if (LimitNowBuyMethod == "Quick Fill")
@@ -2776,6 +2782,10 @@ namespace BitMEXAssistant
                                 {
                                     Price = HighestBid + ActiveInstrument.TickSize;
                                 }
+                            }
+                            else
+                            {
+                                Log("Sell Best Price Unable to set Price:Lowest ask is the same as asking:" + LowestAsk + ":" + LimitNowSellOrderPrice);
                             }
                         }
                         else if (LimitNowSellMethod == "Quick Fill")
