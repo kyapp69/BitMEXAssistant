@@ -542,7 +542,7 @@ namespace BitMEX
             }
         }
 
-        public List<Order> LimitNowOrderSafety(string Symbol, string Side, int Quantity, decimal Price, decimal StopLossDelta, bool ReduceOnly = false, bool PostOnly = false, bool Hidden = false)
+        public List<Order> LimitNowOrderSafety(string Symbol, string Side, int Quantity, decimal Price, decimal StopLossDelta, decimal TakeProfitDelta, decimal TickSize, bool ReduceOnly = false, bool PostOnly = false, bool Hidden = false)
         {
 #if TRUE
             //Console.WriteLine("LimitNowOrderSafety");
@@ -571,46 +571,91 @@ namespace BitMEX
             limitOrder.ContingencyType = "OneTriggersTheOther";
 
             limitOrder.ClOrdLinkID = Guid.NewGuid().ToString();
-            //string order = JsonConvert.SerializeObject(limitOrder);
-            // now we create the OTO order
-            Order OTOOrder = new Order();
-            OTOOrder.Symbol = Symbol;
-            OTOOrder.Price = Price;
-            if (Side == "Buy")
-            {
-                OTOOrder.Side = "Sell";
-                OTOOrder.Price = Price - StopLossDelta;
-            }
-            else
-            {
-                OTOOrder.Side = "Buy";
-                OTOOrder.Price = Price + StopLossDelta;
-            }
-            OTOOrder.OrderQty = Quantity;
-            OTOOrder.OrdType = "Limit";
-            if (ReduceOnly && !PostOnly)
-            {
-                OTOOrder.ExecInst = "ReduceOnly";
-            }
-            else if (!ReduceOnly && PostOnly)
-            {
-                OTOOrder.ExecInst = "ParticipateDoNotInitiate";
-            }
-            else if (ReduceOnly && PostOnly)
-            {
-                OTOOrder.ExecInst = "ReduceOnly,ParticipateDoNotInitiate";
-            }
-            if (Hidden)
-            {
-                OTOOrder.ExecInst = "0";
-            }
-            //OTOOrder.ClOrdID = Guid.NewGuid().ToString();
-            OTOOrder.ClOrdLinkID = limitOrder.ClOrdLinkID;
 
             List<Order> orders = new List<Order>();
 
             orders.Add(limitOrder);
-            orders.Add(OTOOrder);
+            //string order = JsonConvert.SerializeObject(limitOrder);
+            // now we create the OTO order
+            if (StopLossDelta != 0m)
+            {
+                Order StopLossOrder = new Order();
+                StopLossOrder.Symbol = Symbol;
+                StopLossOrder.Price = Price;
+                StopLossOrder.ContingencyType = "OneCancelsTheOther";
+                if (Side == "Buy")
+                {
+                    StopLossOrder.Side = "Sell";
+                    StopLossOrder.Price = Price - StopLossDelta;
+                }
+                else
+                {
+                    StopLossOrder.Side = "Buy";
+                    StopLossOrder.Price = Price + StopLossDelta;
+                }
+                StopLossOrder.OrderQty = Quantity;
+                StopLossOrder.OrdType = "Limit";
+                if (ReduceOnly && !PostOnly)
+                {
+                    StopLossOrder.ExecInst = "ReduceOnly";
+                }
+                else if (!ReduceOnly && PostOnly)
+                {
+                    StopLossOrder.ExecInst = "ParticipateDoNotInitiate";
+                }
+                else if (ReduceOnly && PostOnly)
+                {
+                    StopLossOrder.ExecInst = "ReduceOnly,ParticipateDoNotInitiate";
+                }
+                if (Hidden)
+                {
+                    StopLossOrder.ExecInst = "0";
+                }
+                //OTOOrder.ClOrdID = Guid.NewGuid().ToString();
+                StopLossOrder.ClOrdLinkID = limitOrder.ClOrdLinkID;
+                orders.Add(StopLossOrder);
+            }
+            if (TakeProfitDelta != 0m)
+            {
+                Order TakeProfitOrder = new Order();
+                TakeProfitOrder.Symbol = Symbol;
+                TakeProfitOrder.Price = Price;
+                TakeProfitOrder.ContingencyType = "OneCancelsTheOther";
+                if (Side == "Buy")
+                {
+                    TakeProfitOrder.Side = "Sell";
+                    TakeProfitOrder.Price = Price + TakeProfitDelta;
+                    TakeProfitOrder.StopPx = TakeProfitOrder.Price - TickSize;
+                }
+                else
+                {
+                    TakeProfitOrder.Side = "Buy";
+                    TakeProfitOrder.Price = Price - TakeProfitDelta;
+                    TakeProfitOrder.StopPx = TakeProfitOrder.Price + TickSize;
+                }
+                TakeProfitOrder.OrderQty = Quantity;
+                TakeProfitOrder.OrdType = "LimitIfTouched";
+                if (ReduceOnly && !PostOnly)
+                {
+                    TakeProfitOrder.ExecInst = "ReduceOnly";
+                }
+                else if (!ReduceOnly && PostOnly)
+                {
+                    TakeProfitOrder.ExecInst = "ParticipateDoNotInitiate";
+                }
+                else if (ReduceOnly && PostOnly)
+                {
+                    TakeProfitOrder.ExecInst = "ReduceOnly,ParticipateDoNotInitiate";
+                }
+                if (Hidden)
+                {
+                    TakeProfitOrder.ExecInst = "0";
+                }
+                //OTOOrder.ClOrdID = Guid.NewGuid().ToString();
+                TakeProfitOrder.ClOrdLinkID = limitOrder.ClOrdLinkID;
+                orders.Add(TakeProfitOrder);
+            }
+
 
             string orderlist = JsonConvert.SerializeObject(orders);
             string res = BulkOrder(orderlist);

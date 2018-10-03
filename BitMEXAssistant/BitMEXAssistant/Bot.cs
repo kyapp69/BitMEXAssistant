@@ -48,6 +48,8 @@ namespace BitMEXAssistant
         int DCASeconds = 0;
         int DCATimes = 0;
         string DCASide = "Buy";
+        string FormatSpec = "0.00";
+        decimal multiplier = 1;
 
         WebSocket ws_general;
         WebSocket ws_user;
@@ -57,7 +59,7 @@ namespace BitMEXAssistant
         Dictionary<string, decimal> Prices = new Dictionary<string, decimal>();
         //List<Alert> Alerts = new List<Alert>();
 
-        public static string Version = "0.0.21";
+        public static string Version = "0.0.22";
 
         string LimitNowBuyOrderId = "";
         decimal LimitNowBuyOrderPrice = 0;
@@ -101,6 +103,8 @@ namespace BitMEXAssistant
         string LimitNowSellMethod = "";
         decimal LimitNowStopLossSellDelta = decimal.Zero;
         decimal LimitNowStopLossBuyDelta = decimal.Zero;
+        decimal LimitNowTakeProfitSellDelta = decimal.Zero;
+        decimal LimitNowTakeProfitBuyDelta = decimal.Zero;
 
         int LimitNowBuyLevel = 0;
         int LimitNowSellLevel = 0;
@@ -292,6 +296,53 @@ namespace BitMEXAssistant
                                 JArray TD = (JArray)Message["data"];
                                 if (TD.Any())
                                 {
+                                    //Console.WriteLine("Trade Data:Action:" + Message["action"]+":"+TD.Count);
+                                    decimal sellVol = decimal.Zero;
+                                    decimal buyVol = decimal.Zero;
+                                    SortedDictionary<int, int> SellPriceVol = new SortedDictionary<int, int>();
+                                    SortedDictionary<int, int> BuyPriceVol = new SortedDictionary<int, int>();
+                                    for (int i=0;i<TD.Count;i++)
+                                    {
+                                        JToken jo = (JToken)TD[i];
+                                        decimal keyprice = (decimal)jo["price"];
+                                        //decimal multiplier = 10 ^ ActiveInstrument.DecimalPlacesInTickSize;
+                                        keyprice = keyprice * multiplier;
+                                        int key = (int)keyprice;
+                                        if (jo["side"].ToString() == "Sell")
+                                        {
+                                            if (SellPriceVol.ContainsKey(key))
+                                                SellPriceVol[key]+= (int)jo["size"];
+                                            else
+                                                SellPriceVol[key] = (int)jo["size"];
+                                        }
+                                        else if (jo["side"].ToString() == "Buy")
+                                        {
+                                            if (BuyPriceVol.ContainsKey(key))
+                                                BuyPriceVol[key] += (int)jo["size"];
+                                            else
+                                                BuyPriceVol[key] = (int)jo["size"];
+                                        }
+                                        //Console.WriteLine("Price:" + ((decimal)jo["price"]).ToString(FormatSpec) + " Side:" + jo["side"]+ " Volume:" + jo["size"]+" TS:"+jo["timestamp"]);
+                                    }
+                                    if (SellPriceVol.Count > 0)
+                                    {
+                                        foreach (KeyValuePair<int, int> kvp in SellPriceVol)
+                                        {
+                                            decimal price = (decimal)kvp.Key;
+                                            price = price / multiplier;
+                                            //Console.WriteLine("Sell:" + price.ToString(FormatSpec) + ":" + kvp.Value);
+                                        }
+                                    }
+                                    if (BuyPriceVol.Count > 0)
+                                    {
+                                        foreach (KeyValuePair<int, int> kvp in BuyPriceVol)
+                                        {
+                                            decimal price = (decimal)kvp.Key;
+                                            price = price / multiplier;
+                                            //Console.WriteLine("Buy:" + price.ToString(FormatSpec) + ":" + kvp.Value);
+                                        }
+                                    }
+                                    //Console.WriteLine("TradeVol:Buy:" + buyVol + ":Sell:" + sellVol);
                                     decimal Price = (decimal)TD.Children().LastOrDefault()["price"];
                                     string Symbol = (string)TD.Children().LastOrDefault()["symbol"];
                                     Prices[Symbol] = Price;
@@ -443,7 +494,7 @@ namespace BitMEXAssistant
                                             }
                                             else
                                             {
-                                                Console.WriteLine("Unable to find record L2 Ask");
+                                                Console.WriteLine("(Delete)Unable to find record L2 Ask");
                                             }
                                         }
                                         else if ((string)i["side"] == "Buy")
@@ -454,7 +505,7 @@ namespace BitMEXAssistant
                                             }
                                             else
                                             {
-                                                Console.WriteLine("Unable to find record L2 Bids");
+                                                Console.WriteLine("(Delete)Unable to find record L2 Bids");
                                             }
                                         }
                                     }
@@ -484,7 +535,7 @@ namespace BitMEXAssistant
                                             }
                                             else
                                             {
-                                                Console.WriteLine("Unable to find record L2 Ask");
+                                                Console.WriteLine("(Update)Unable to find record L2 Ask");
                                             }
                                         }
                                         else if ((string)i["side"] == "Buy")
@@ -495,7 +546,7 @@ namespace BitMEXAssistant
                                             }
                                             else
                                             {
-                                                Console.WriteLine("Unable to find record L2 Bids");
+                                                Console.WriteLine("(Update)Unable to find record L2 Bids");
                                             }
                                         }
                                     }
@@ -514,7 +565,7 @@ namespace BitMEXAssistant
                                         {
                                             if (OrderBookL2Asks.ContainsKey(ID))
                                             {
-                                                Console.WriteLine("L2 Asks already contains key");
+                                                Console.WriteLine("(Insert)L2 Asks already contains key");
                                             }
                                             else
                                             {
@@ -525,7 +576,7 @@ namespace BitMEXAssistant
                                         {
                                             if (OrderBookL2Bids.ContainsKey(ID))
                                             {
-                                                Console.WriteLine("L2 Bids already contains key");
+                                                Console.WriteLine("(Insert)L2 Bids already contains key");
                                             }
                                             else
                                             {
@@ -594,10 +645,16 @@ namespace BitMEXAssistant
                                     }
                                     if (TD.Children().LastOrDefault()["unrealisedPnlPcnt"] != null)
                                     {
+                                        Console.WriteLine("PnlPcnt:" + (decimal?)TD.Children().LastOrDefault()["unrealisedPnlPcnt"]);
                                         SymbolPosition.UnrealisedPnlPcnt = (decimal?)TD.Children().LastOrDefault()["unrealisedPnlPcnt"];
 
                                     }
+                                    if (TD.Children().LastOrDefault()["unrealisedRoePcnt"] != null)
+                                    {
+                                        Console.WriteLine("ROEPnlPcnt:" + (decimal?)TD.Children().LastOrDefault()["unrealisedRoePcnt"]);
+                                        SymbolPosition.UnrealisedPnlPcnt = (decimal?)TD.Children().LastOrDefault()["unrealisedRoePcnt"];
 
+                                    }
                                 }
                             }
                         }
@@ -757,6 +814,7 @@ namespace BitMEXAssistant
                         }
                         else if ((string)Message["table"] == "position")
                         {
+                            //Console.WriteLine("Position data");
                             // PARSE
                             if (Message.ContainsKey("data"))
                             {
@@ -797,10 +855,25 @@ namespace BitMEXAssistant
                                     }
                                     if (TD.Children().LastOrDefault()["unrealisedPnlPcnt"] != null)
                                     {
+                                        //Console.WriteLine("PnlPcnt:" + (decimal?)TD.Children().LastOrDefault()["unrealisedPnlPcnt"]);
                                         SymbolPosition.UnrealisedPnlPcnt = (decimal?)TD.Children().LastOrDefault()["unrealisedPnlPcnt"];
+                                        SymbolPosition.UnrealisedPnlPcnt *= 100.0m;
 
                                     }
+                                    if (TD.Children().LastOrDefault()["unrealisedRoePcnt"] != null)
+                                    {
+                                        //Console.WriteLine("ROEPnlPcnt:" + (decimal?)TD.Children().LastOrDefault()["unrealisedRoePcnt"]);
+                                        //SymbolPosition.UnrealisedPnlPcnt = (decimal?)TD.Children().LastOrDefault()["unrealisedRoePcnt"];
 
+                                    }
+                                    if (TD.Children().LastOrDefault()["currentTimestamp"] != null)
+                                    {
+                                        //Console.WriteLine("TimeStamp:" + TD.Children().LastOrDefault()["currentTimestamp"]);
+                                        DateTime dt = new DateTime();
+                                        dt = DateTime.Parse(TD.Children().LastOrDefault()["currentTimestamp"].ToString());
+                                        //Console.WriteLine("Local:"+dt.ToLocalTime());
+
+                                    }
                                 }
                             }
                         }
@@ -846,7 +919,7 @@ namespace BitMEXAssistant
                             //Console.WriteLine("User Websocket execution");
                             if (Message.ContainsKey("data"))
                             {
-                                //Console.WriteLine("Execution Data:" + Message["data"]);
+                                Console.WriteLine("Execution Data:" + Message["data"]);
                             }
                         }
                         else if ((string)Message["table"] == "order")
@@ -854,7 +927,7 @@ namespace BitMEXAssistant
                             //Console.WriteLine("User Websocket order");
                             if (Message.ContainsKey("data"))
                             {
-                                //Console.WriteLine("Order Data:" + Message["data"]);
+                                Console.WriteLine("Order Data:" + Message["data"]);
                             }
                         }
                     }
@@ -970,10 +1043,10 @@ namespace BitMEXAssistant
                 ws_user.Send("{\"op\": \"unsubscribe\", \"args\": [\"position:" + ActiveInstrument.Symbol + "\"]}");
             }
             // Subscribe to position for new symbol
-            ws_user.Send("{\"op\": \"subscribe\", \"args\": [\"order\",\"wallet\",\"execution\"]}");
+            ws_user.Send("{\"op\": \"subscribe\", \"args\": [\"order\",\"wallet\",\"execution\",\"position\"]}");
             if (FirstLoad)
             {
-                ws_user.Send("{\"op\": \"subscribe\", \"args\": [\"order\",\"wallet\",\"execution\"]}");
+                ws_user.Send("{\"op\": \"subscribe\", \"args\": [\"order\",\"wallet\",\"execution\",\"position\"]}");
             }
             Console.WriteLine("ReInitialized User websocket");
         }
@@ -1115,6 +1188,11 @@ namespace BitMEXAssistant
             nudLimitNowStopLossSellDelta.Value = Properties.Settings.Default.LimitNowStopLossSellDelta;
             nudLimitNowBuyLevel.Value = Properties.Settings.Default.LimitNowBuyLevel;
             nudLimitNowSellLevel.Value = Properties.Settings.Default.LimitNowSellLevel;
+
+            chkLimitNowTakeProfitBuy.Checked = Properties.Settings.Default.LimitNowTakeProfitBuy;
+            chkLimitNowTakeProfitSell.Checked = Properties.Settings.Default.LimitNowTakeProfitSell;
+            nudLimitNowTakeProfitBuyDelta.Value = Properties.Settings.Default.LimitNowTakeProfitBuyDelta;
+            nudLimitNowTakeProfitSellDelta.Value = Properties.Settings.Default.LimitNowTakeProfitSellDelta;
 
             LimitNowSellTicksFromCenter = Properties.Settings.Default.LimitNowSellTicksFromCenter;
             LimitNowBuyTicksFromCenter = Properties.Settings.Default.LimitNowBuyTicksFromCenter;
@@ -1258,6 +1336,18 @@ namespace BitMEXAssistant
 
         private void UpdateFormsForTickSize(decimal TickSize, int Decimals)
         {
+            FormatSpec = "0.";
+            //if (Decimals == 1)
+            //{
+            //    Decimals = 2;
+            //}
+            float mult = 1;
+            for(int i=0;i<Decimals;i++)
+            {
+                FormatSpec += "0";
+                mult = mult * 10;
+            }
+            multiplier = (decimal)mult;
             Log("Current Tick size:" + TickSize + ":" + Decimals);
             nudPositionLimitPrice.Invoke((MethodInvoker)(()=>
                 {
@@ -2184,6 +2274,7 @@ namespace BitMEXAssistant
                     decimal Price = LimitNowGetOrderPrice("Buy");
                     if (CheckOrderPrices(LimitNowBuyOrders, Price))
                     {
+                        Log("LimitNow Updating Buy order");
                         tmrLimitNowBuy_Tick(this, EventArgs.Empty);
                     }
                 }
@@ -2203,6 +2294,7 @@ namespace BitMEXAssistant
                     decimal Price = LimitNowGetOrderPrice("Sell");
                     if (CheckOrderPrices(LimitNowSellOrders, Price))
                     {
+                        Log("LimitNow Updating Sell order");
                         tmrLimitNowSell_Tick(this, EventArgs.Empty);
                     }
                 }
@@ -2241,6 +2333,7 @@ namespace BitMEXAssistant
             }
             else
             {
+                Log("Cancel all Buys because unable to amend price");
                 // Order no longer available, stop it
                 LimitNowStopBuying();
             }
@@ -2252,6 +2345,7 @@ namespace BitMEXAssistant
             // Initial order
             decimal Price = LimitNowGetOrderPrice("Buy");
             decimal StopLossDelta = ActiveInstrument.TickSize * LimitNowStopLossBuyDelta;
+            decimal TakeProfitDelta = ActiveInstrument.TickSize * LimitNowTakeProfitBuyDelta;
             List<Order> LimitNowOrderResult = null;
             if (chkLimitNowOrderBookDetectionBuy.Checked && false)
             {
@@ -2259,9 +2353,13 @@ namespace BitMEXAssistant
             }
             else 
             {
-                if (chkLimitNowStopLossBuy.Checked)
+                if (chkLimitNowStopLossBuy.Checked || chkLimitNowTakeProfitBuy.Checked)
                 {
-                    LimitNowOrderResult = bitmex.LimitNowOrderSafety(ActiveInstrument.Symbol, "Buy", (int)nudLimitNowBuyContracts.Value, Price, StopLossDelta, chkLimitNowBuyReduceOnly.Checked, true, false);
+                    if (!chkLimitNowStopLossBuy.Checked)
+                        StopLossDelta = 0m;
+                    if (!chkLimitNowTakeProfitBuy.Checked)
+                        TakeProfitDelta = 0m;
+                    LimitNowOrderResult = bitmex.LimitNowOrderSafety(ActiveInstrument.Symbol, "Buy", (int)nudLimitNowBuyContracts.Value, Price, StopLossDelta, TakeProfitDelta, ActiveInstrument.TickSize, chkLimitNowBuyReduceOnly.Checked, true, false);
                 }
                 else
                 {
@@ -2302,15 +2400,20 @@ namespace BitMEXAssistant
             // Initial order
             decimal Price = LimitNowGetOrderPrice("Sell");
             decimal StopLossDelta = ActiveInstrument.TickSize * LimitNowStopLossSellDelta;
+            decimal TakeProfitDelta = ActiveInstrument.TickSize * LimitNowTakeProfitSellDelta;
             if (chkLimitNowOrderBookDetectionSell.Checked && false) // for testing only
             {
                 LimitNowOrderResult = bitmex.LimitNowOrderBreakout(ActiveInstrument.Symbol, "Sell", (int)nudLimitNowSellContracts.Value, Price, chkLimitNowSellReduceOnly.Checked, true, false);
             }
             else
             {
-                if (chkLimitNowStopLossSell.Checked)
+                if (chkLimitNowStopLossSell.Checked || chkLimitNowTakeProfitSell.Checked)
                 {
-                    LimitNowOrderResult = bitmex.LimitNowOrderSafety(ActiveInstrument.Symbol, "Sell", (int)nudLimitNowSellContracts.Value, Price, StopLossDelta, chkLimitNowSellReduceOnly.Checked, true, false);
+                    if (!chkLimitNowStopLossSell.Checked)
+                        StopLossDelta = 0m;
+                    if (!chkLimitNowTakeProfitSell.Checked)
+                        TakeProfitDelta = 0m;
+                    LimitNowOrderResult = bitmex.LimitNowOrderSafety(ActiveInstrument.Symbol, "Sell", (int)nudLimitNowSellContracts.Value, Price, StopLossDelta, TakeProfitDelta, ActiveInstrument.TickSize, chkLimitNowSellReduceOnly.Checked, true, false);
                 }
                 else
                 {
@@ -2367,9 +2470,17 @@ namespace BitMEXAssistant
                     {
                         LimitNowBuyOrders[i].Price = Price;
                         LimitNowBuyOrders[i].OrderQty = Contracts;
-                        if (LimitNowBuyOrders[i].ContingencyType == "")
+                        if (LimitNowBuyOrders[i].ContingencyType == "OneCancelsTheOther")
                         {
-                            LimitNowBuyOrders[i].Price = Price - ActiveInstrument.TickSize * LimitNowStopLossBuyDelta;
+                            if (LimitNowBuyOrders[i].Side == "Sell" && LimitNowBuyOrders[i].OrdType == "Limit")
+                            {
+                                LimitNowBuyOrders[i].Price = Price - ActiveInstrument.TickSize * LimitNowStopLossBuyDelta;
+                            }
+                            if (LimitNowBuyOrders[i].Side == "Sell" && LimitNowBuyOrders[i].OrdType == "LimitIfTouched")
+                            {
+                                LimitNowBuyOrders[i].Price = Price + ActiveInstrument.TickSize * LimitNowTakeProfitBuyDelta;
+                                LimitNowBuyOrders[i].StopPx = LimitNowBuyOrders[i].Price - ActiveInstrument.TickSize;
+                            }
                         }
                         //LimitNowBuyOrders[i].OrdStatus = "";
                         OrderAmend order = new OrderAmend(LimitNowBuyOrders[i]);
@@ -2379,6 +2490,7 @@ namespace BitMEXAssistant
                     string res = bitmex.AmendBulkOrder(orderlist);
                     if (res.Contains("Error"))
                     {
+                        Log("Amend Buying price error:"+res);
                         return LimitNowOrderResult;
                     }
                     //Console.WriteLine("Amend Buying return:" + res);
@@ -2390,6 +2502,7 @@ namespace BitMEXAssistant
             else
             {
                 //Console.WriteLine("Price is zero?!" + Price);
+                Log("Unable to amend buy not able to get price:" + Price);
                 LimitNowOrderResult.Add(new Order());
             }
             return LimitNowOrderResult;
@@ -2414,9 +2527,17 @@ namespace BitMEXAssistant
                     {
                         LimitNowSellOrders[i].Price = Price;
                         LimitNowSellOrders[i].OrderQty = Contracts;
-                        if (LimitNowSellOrders[i].ContingencyType == "")
+                        if (LimitNowSellOrders[i].ContingencyType == "OneCancelsTheOther")
                         {
-                            LimitNowSellOrders[i].Price = Price + ActiveInstrument.TickSize * LimitNowStopLossSellDelta;
+                            if (LimitNowSellOrders[i].Side == "Buy" && LimitNowBuyOrders[i].OrdType == "Limit")
+                            {
+                                LimitNowSellOrders[i].Price = Price + ActiveInstrument.TickSize * LimitNowStopLossSellDelta;
+                            }
+                            if (LimitNowSellOrders[i].Side == "Buy" && LimitNowBuyOrders[i].OrdType == "LimitIfTouched")
+                            {
+                                LimitNowSellOrders[i].Price = Price - ActiveInstrument.TickSize * LimitNowTakeProfitSellDelta;
+                                LimitNowSellOrders[i].StopPx = LimitNowSellOrders[i].Price + ActiveInstrument.TickSize;
+                            }
                         }
                         //LimitNowSellOrders[i].OrdStatus = "";
                         OrderAmend order = new OrderAmend(LimitNowSellOrders[i]);
@@ -2428,6 +2549,7 @@ namespace BitMEXAssistant
                     //Console.WriteLine("Amend Selling return:" + res);
                     if (res.Contains("Error"))
                     {
+                        Log("Amend Selling price error:"+res);
                         return LimitNowOrderResult;
                     }
                     LimitNowOrderResult = (JsonConvert.DeserializeObject<List<Order>>(res));
@@ -2436,7 +2558,7 @@ namespace BitMEXAssistant
             }
             else
             {
-                //Console.WriteLine("Price is zero?!" + Price);
+                Log("Unable to amend sell not able to get price:" + Price);
                 LimitNowOrderResult.Add(new Order());
             }
             return LimitNowOrderResult;
@@ -2458,6 +2580,7 @@ namespace BitMEXAssistant
             }
             else
             {
+                Log("Cancel all Sells because unable to amend price");
                 // Order no longer available, stop it
                 LimitNowStopSelling();
             }
@@ -2561,11 +2684,14 @@ namespace BitMEXAssistant
             */
             //bitmex.CancelOrder(LimitNowBuyOrderId);
             chkLimitNowBuyContinue.Checked = false;
+            Log("Cancel Buy button clicked");
             LimitNowStopBuying();
         }
 
         private void CancelAllBuys()
         {
+            Log("Cancelling All Buy orders");
+
             for (int i = 0; i < LimitNowBuyOrders.Count; i++)
             {
                 bitmex.CancelOrder(LimitNowBuyOrders[i].OrderId);
@@ -2585,11 +2711,13 @@ namespace BitMEXAssistant
             */
             //bitmex.CancelOrder(LimitNowSellOrderId);
             chkLimitNowSellContinue.Checked = false;
+            Log("Cancel Sell button clicked");
             LimitNowStopSelling();
         }
 
         private void CancelAllSells()
         {
+            Log("Cancelling All Sell orders");
             for (int i = 0; i < LimitNowSellOrders.Count; i++)
             {
                 bitmex.CancelOrder(LimitNowSellOrders[i].OrderId);
@@ -3179,34 +3307,40 @@ namespace BitMEXAssistant
 
         private void btnLimitNowCheckPrice_Sell_Click(object sender, EventArgs e)
         {
-            decimal OrderPrice = LimitNowGetOrderPrice("Sell");
+            decimal OrderPrice = 0m;
+            decimal OrderPriceL2 = 0m;
+            OrderPriceL2 = LimitNowGetOrderPrice("Sell", true);
+            OrderPrice = LimitNowGetOrderPrice("Sell");
             decimal StopLossDelta = ActiveInstrument.TickSize * LimitNowStopLossSellDelta;
+            decimal TakeProfitDelta = ActiveInstrument.TickSize * LimitNowTakeProfitSellDelta;
+            Log("Sell Order Price:" + OrderPrice+":L2:"+OrderPriceL2);
             if (chkLimitNowStopLossSell.Checked)
             {
-                Log("Sell Order Price:" + OrderPrice+":SL:"+(OrderPrice+StopLossDelta));
+                Log("SL:"+(OrderPrice + StopLossDelta));
             }
-            else
+            if (chkLimitNowStopLossSell.Checked)
             {
-                Log("Sell Order Price:" + OrderPrice);
+                Log("TP:" + (OrderPrice - TakeProfitDelta));
             }
-            OrderPrice = LimitNowGetOrderPrice("Sell",true);
-            Log("Sell Order Price L2:" + OrderPrice);
         }
 
         private void btnLimitNowCheckPrice_Buy_Click(object sender, EventArgs e)
         {
-            decimal OrderPrice = LimitNowGetOrderPrice("Buy");
+            decimal OrderPrice = 0m;
+            decimal OrderPriceL2 = 0m;
+            OrderPriceL2 = LimitNowGetOrderPrice("Buy", true);
+            OrderPrice = LimitNowGetOrderPrice("Buy");
             decimal StopLossDelta = ActiveInstrument.TickSize * LimitNowStopLossBuyDelta;
+            decimal TakeProfitDelta = ActiveInstrument.TickSize * LimitNowTakeProfitBuyDelta;
+            Log("Buy Order Price:" + OrderPrice+":"+OrderPriceL2);
             if (chkLimitNowStopLossBuy.Checked)
             {
-                Log("Buy Order Price:" + OrderPrice + ":SL:" + (OrderPrice - StopLossDelta));
+                Log("SL:" + (OrderPrice - StopLossDelta));
             }
-            else
+            if (chkLimitNowTakeProfitBuy.Checked)
             {
-                Log("Buy Order Price:" + OrderPrice);
+                Log("TP:" + (OrderPrice + TakeProfitDelta));
             }
-            OrderPrice = LimitNowGetOrderPrice("Buy", true);
-            Log("Buy Order Price L2:" + OrderPrice);
         }
 
         private void nudLimitNowBuyLevel_ValueChanged(object sender, EventArgs e)
@@ -3242,6 +3376,32 @@ namespace BitMEXAssistant
         private void metroButton1_Click(object sender, EventArgs e)
         {
             ws_user.Send("ping");
+        }
+
+        private void chkLimitNowTakeProfitSell_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.LimitNowTakeProfitSell = chkLimitNowTakeProfitSell.Checked;
+            SaveSettings();
+        }
+
+        private void chkLimitNowTakeProfitBuy_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.LimitNowTakeProfitBuy = chkLimitNowTakeProfitBuy.Checked;
+            SaveSettings();
+        }
+
+        private void nudLimitNowTakeProfitSellDelta_ValueChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.LimitNowTakeProfitSellDelta = nudLimitNowTakeProfitSellDelta.Value;
+            LimitNowTakeProfitSellDelta = nudLimitNowTakeProfitSellDelta.Value;
+            SaveSettings();
+        }
+
+        private void nudLimitNowTakeProfitBuyDelta_ValueChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.LimitNowTakeProfitBuyDelta = nudLimitNowTakeProfitBuyDelta.Value;
+            LimitNowTakeProfitBuyDelta = nudLimitNowTakeProfitBuyDelta.Value;
+            SaveSettings();
         }
     }
 

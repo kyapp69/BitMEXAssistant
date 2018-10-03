@@ -876,6 +876,67 @@ namespace BitMEXAssistant.Properties {
                 this["TabSelection"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool LimitNowTakeProfitBuy
+        {
+            get
+            {
+                return ((bool)(this["LimitNowTakeProfitBuy"]));
+            }
+            set
+            {
+                this["LimitNowTakeProfitBuy"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool LimitNowTakeProfitSell
+        {
+            get
+            {
+                return ((bool)(this["LimitNowTakeProfitSell"]));
+            }
+            set
+            {
+                this["LimitNowTakeProfitSell"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public decimal LimitNowTakeProfitSellDelta
+        {
+            get
+            {
+                return ((decimal)(this["LimitNowTakeProfitSellDelta"]));
+            }
+            set
+            {
+                this["LimitNowTakeProfitSellDelta"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public decimal LimitNowTakeProfitBuyDelta
+        {
+            get
+            {
+                return ((decimal)(this["LimitNowTakeProfitBuyDelta"]));
+            }
+            set
+            {
+                this["LimitNowTakeProfitBuyDelta"] = value;
+            }
+        }
+
     }
 
 }
