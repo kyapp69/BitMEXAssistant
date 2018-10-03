@@ -3688,7 +3688,10 @@
             this.ResumeLayout(false);
             this.PerformLayout();
 
+            this.KeyDown += Bot_KeyDown;
+
         }
+
 
         #endregion
         private MetroFramework.Controls.MetroComboBox ddlCandleTimes;

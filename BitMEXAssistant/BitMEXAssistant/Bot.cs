@@ -59,7 +59,7 @@ namespace BitMEXAssistant
         Dictionary<string, decimal> Prices = new Dictionary<string, decimal>();
         //List<Alert> Alerts = new List<Alert>();
 
-        public static string Version = "0.0.22";
+        public static string Version = "0.0.23";
 
         string LimitNowBuyOrderId = "";
         decimal LimitNowBuyOrderPrice = 0;
@@ -3402,6 +3402,39 @@ namespace BitMEXAssistant
             Properties.Settings.Default.LimitNowTakeProfitBuyDelta = nudLimitNowTakeProfitBuyDelta.Value;
             LimitNowTakeProfitBuyDelta = nudLimitNowTakeProfitBuyDelta.Value;
             SaveSettings();
+        }
+
+        private void Bot_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            Console.WriteLine("KeyDown event:" + e.KeyCode);
+            //throw new System.NotImplementedException();
+            switch (e.KeyCode)
+            {
+                case Keys.Q:
+                    Console.WriteLine("Limit now buy");
+                    btnLimitNowBuy_Click(this, EventArgs.Empty);
+                    break;
+                case Keys.E:
+                    Console.WriteLine("Limit now sell");
+                    btnLimitNowSell_Click(this, EventArgs.Empty);
+                    break;
+                case Keys.A:
+                    Console.WriteLine("Market buy");
+                    btnManualMarketBuy_Click(this, EventArgs.Empty);
+                    break;
+                case Keys.D:
+                    Console.WriteLine("Market sell");
+                    btnManualMarketSell_Click(this, EventArgs.Empty);
+                    break;
+                case Keys.X:
+                    Console.WriteLine("Market close position");
+                    btnPositionMarketClose_Click(this, EventArgs.Empty);
+                    break;
+                case Keys.Z:
+                    Console.WriteLine("Cancel all orders");
+                    bitmex.CancelAllOpenOrders(ActiveInstrument.Symbol);
+                    break;
+            }
         }
     }
 
