@@ -583,18 +583,21 @@ namespace BitMEX
                 StopLossOrder.Symbol = Symbol;
                 StopLossOrder.Price = Price;
                 StopLossOrder.ContingencyType = "OneCancelsTheOther";
+                //StopLossOrder.ContingencyType = "";
                 if (Side == "Buy")
                 {
                     StopLossOrder.Side = "Sell";
                     StopLossOrder.Price = Price - StopLossDelta;
+                    StopLossOrder.StopPx = StopLossOrder.Price + TickSize;
                 }
                 else
                 {
                     StopLossOrder.Side = "Buy";
                     StopLossOrder.Price = Price + StopLossDelta;
+                    StopLossOrder.StopPx = StopLossOrder.Price - TickSize;
                 }
                 StopLossOrder.OrderQty = Quantity;
-                StopLossOrder.OrdType = "Limit";
+                StopLossOrder.OrdType = "StopLimit";
                 if (ReduceOnly && !PostOnly)
                 {
                     StopLossOrder.ExecInst = "ReduceOnly";
@@ -611,6 +614,7 @@ namespace BitMEX
                 {
                     StopLossOrder.ExecInst = "0";
                 }
+                StopLossOrder.ExecInst += ",LastPrice";
                 //OTOOrder.ClOrdID = Guid.NewGuid().ToString();
                 StopLossOrder.ClOrdLinkID = limitOrder.ClOrdLinkID;
                 orders.Add(StopLossOrder);
@@ -621,6 +625,7 @@ namespace BitMEX
                 TakeProfitOrder.Symbol = Symbol;
                 TakeProfitOrder.Price = Price;
                 TakeProfitOrder.ContingencyType = "OneCancelsTheOther";
+                //TakeProfitOrder.ContingencyType = "";
                 if (Side == "Buy")
                 {
                     TakeProfitOrder.Side = "Sell";
@@ -651,6 +656,7 @@ namespace BitMEX
                 {
                     TakeProfitOrder.ExecInst = "0";
                 }
+                TakeProfitOrder.ExecInst += ",LastPrice";
                 //OTOOrder.ClOrdID = Guid.NewGuid().ToString();
                 TakeProfitOrder.ClOrdLinkID = limitOrder.ClOrdLinkID;
                 orders.Add(TakeProfitOrder);

@@ -2385,10 +2385,12 @@ namespace BitMEXAssistant
                     LimitNowBuyOrderId = LimitNowOrderResult.FirstOrDefault().OrderId;
                     LimitNowBuyOrderPrice = Price;
                 }
-                if (!chkLimitNowOrderBookDetectionBuy.Checked)
+#if false
+                if (!chkLimitNowOrderBookDetectionBuy.Checked && false) // forever 
                     tmrLimitNowBuy.Start();
+#endif
             }
-            
+
 
             return LimitNowOrderResult;
         }
@@ -2441,8 +2443,10 @@ namespace BitMEXAssistant
                     LimitNowSellOrderId = LimitNowOrderResult.FirstOrDefault().OrderId;
                     LimitNowSellOrderPrice = Price;
                 }
+#if false
                 if (!chkLimitNowOrderBookDetectionSell.Checked)
                     tmrLimitNowSell.Start();
+#endif
             }
 
 
@@ -2470,11 +2474,12 @@ namespace BitMEXAssistant
                     {
                         LimitNowBuyOrders[i].Price = Price;
                         LimitNowBuyOrders[i].OrderQty = Contracts;
-                        if (LimitNowBuyOrders[i].ContingencyType == "OneCancelsTheOther")
+                        if (LimitNowBuyOrders[i].ContingencyType == "OneCancelsTheOther" || true)
                         {
-                            if (LimitNowBuyOrders[i].Side == "Sell" && LimitNowBuyOrders[i].OrdType == "Limit")
+                            if (LimitNowBuyOrders[i].Side == "Sell" && LimitNowBuyOrders[i].OrdType == "StopLimit")
                             {
                                 LimitNowBuyOrders[i].Price = Price - ActiveInstrument.TickSize * LimitNowStopLossBuyDelta;
+                                LimitNowBuyOrders[i].StopPx = LimitNowBuyOrders[i].Price + ActiveInstrument.TickSize;
                             }
                             if (LimitNowBuyOrders[i].Side == "Sell" && LimitNowBuyOrders[i].OrdType == "LimitIfTouched")
                             {
@@ -2527,13 +2532,14 @@ namespace BitMEXAssistant
                     {
                         LimitNowSellOrders[i].Price = Price;
                         LimitNowSellOrders[i].OrderQty = Contracts;
-                        if (LimitNowSellOrders[i].ContingencyType == "OneCancelsTheOther")
+                        if (LimitNowSellOrders[i].ContingencyType == "OneCancelsTheOther" || true)
                         {
-                            if (LimitNowSellOrders[i].Side == "Buy" && LimitNowBuyOrders[i].OrdType == "Limit")
+                            if (LimitNowSellOrders[i].Side == "Buy" && LimitNowSellOrders[i].OrdType == "StopLimit")
                             {
                                 LimitNowSellOrders[i].Price = Price + ActiveInstrument.TickSize * LimitNowStopLossSellDelta;
+                                LimitNowSellOrders[i].StopPx = LimitNowSellOrders[i].Price - ActiveInstrument.TickSize;
                             }
-                            if (LimitNowSellOrders[i].Side == "Buy" && LimitNowBuyOrders[i].OrdType == "LimitIfTouched")
+                            if (LimitNowSellOrders[i].Side == "Buy" && LimitNowSellOrders[i].OrdType == "LimitIfTouched")
                             {
                                 LimitNowSellOrders[i].Price = Price - ActiveInstrument.TickSize * LimitNowTakeProfitSellDelta;
                                 LimitNowSellOrders[i].StopPx = LimitNowSellOrders[i].Price + ActiveInstrument.TickSize;
@@ -2609,7 +2615,7 @@ namespace BitMEXAssistant
         private void UpdateOrders()
         {
             //Console.WriteLine("Trade Update");
-            if (chkLimitNowOrderBookDetectionSell.Checked)
+            if (chkLimitNowOrderBookDetectionSell.Checked || true) // forever use orderbook update
             {
 #if USE_SEPARATE_THREADS
                 UpdateLimitNowSells.Set();
@@ -2625,7 +2631,7 @@ namespace BitMEXAssistant
                 }
 #endif
             }
-            if (chkLimitNowOrderBookDetectionBuy.Checked)
+            if (chkLimitNowOrderBookDetectionBuy.Checked || true) // forever use order book updates
             {
 #if USE_SEPARATE_THREADS
                 UpdateLimitNowBuys.Set();
@@ -2843,7 +2849,7 @@ namespace BitMEXAssistant
 #if !USE_L2
                             LowestAsk = OrderBookTopAsks.OrderBy(a => a.Price).FirstOrDefault().Price;
                             HighestBid = OrderBookTopBids.OrderByDescending(a => a.Price).FirstOrDefault().Price;
-#else                        
+#else
                             LowestAsk = OrderBookL2Asks.ElementAt(0).Value.Price;
                             HighestBid = OrderBookL2Bids.ElementAt(0).Value.Price;
 #endif
@@ -3318,7 +3324,7 @@ namespace BitMEXAssistant
             {
                 Log("SL:"+(OrderPrice + StopLossDelta));
             }
-            if (chkLimitNowStopLossSell.Checked)
+            if (chkLimitNowTakeProfitSell.Checked)
             {
                 Log("TP:" + (OrderPrice - TakeProfitDelta));
             }
