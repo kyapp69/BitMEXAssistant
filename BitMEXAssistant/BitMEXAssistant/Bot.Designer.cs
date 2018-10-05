@@ -375,7 +375,7 @@
             this.TabControl.Controls.Add(this.tabVideos);
             this.TabControl.Location = new System.Drawing.Point(0, 125);
             this.TabControl.Name = "TabControl";
-            this.TabControl.SelectedIndex = 1;
+            this.TabControl.SelectedIndex = 0;
             this.TabControl.Size = new System.Drawing.Size(857, 394);
             this.TabControl.Style = MetroFramework.MetroColorStyle.White;
             this.TabControl.TabIndex = 14;
@@ -433,7 +433,7 @@
             this.btnManualLimitCancelOpenOrders.Size = new System.Drawing.Size(165, 33);
             this.btnManualLimitCancelOpenOrders.Style = MetroFramework.MetroColorStyle.Orange;
             this.btnManualLimitCancelOpenOrders.TabIndex = 18;
-            this.btnManualLimitCancelOpenOrders.Text = "Cancel All Orders";
+            this.btnManualLimitCancelOpenOrders.Text = "Cancel All Orders[&Z]";
             this.btnManualLimitCancelOpenOrders.UseSelectable = true;
             this.btnManualLimitCancelOpenOrders.UseStyleColors = true;
             this.btnManualLimitCancelOpenOrders.Click += new System.EventHandler(this.btnManualLimitCancelOpenOrders_Click);
@@ -846,7 +846,7 @@
             this.btnManualMarketSell.Size = new System.Drawing.Size(81, 80);
             this.btnManualMarketSell.Style = MetroFramework.MetroColorStyle.Red;
             this.btnManualMarketSell.TabIndex = 9;
-            this.btnManualMarketSell.Text = "Market Sell";
+            this.btnManualMarketSell.Text = "Market Sell\r\n[&D]";
             this.btnManualMarketSell.UseSelectable = true;
             this.btnManualMarketSell.UseStyleColors = true;
             this.btnManualMarketSell.Click += new System.EventHandler(this.btnManualMarketSell_Click);
@@ -860,7 +860,7 @@
             this.btnManualMarketBuy.Size = new System.Drawing.Size(81, 80);
             this.btnManualMarketBuy.Style = MetroFramework.MetroColorStyle.Green;
             this.btnManualMarketBuy.TabIndex = 8;
-            this.btnManualMarketBuy.Text = "Market Buy";
+            this.btnManualMarketBuy.Text = "Market Buy\r\n[&A]";
             this.btnManualMarketBuy.UseSelectable = true;
             this.btnManualMarketBuy.UseStyleColors = true;
             this.btnManualMarketBuy.Click += new System.EventHandler(this.btnManualMarketBuy_Click);
@@ -1006,7 +1006,7 @@
             this.chkLimitNowTakeProfitSell.AutoSize = true;
             this.chkLimitNowTakeProfitSell.Location = new System.Drawing.Point(6, 200);
             this.chkLimitNowTakeProfitSell.Name = "chkLimitNowTakeProfitSell";
-            this.chkLimitNowTakeProfitSell.Size = new System.Drawing.Size(77, 15);
+            this.chkLimitNowTakeProfitSell.Size = new System.Drawing.Size(76, 15);
             this.chkLimitNowTakeProfitSell.TabIndex = 41;
             this.chkLimitNowTakeProfitSell.Text = "TakeProfit";
             this.chkLimitNowTakeProfitSell.UseSelectable = true;
@@ -1246,7 +1246,7 @@
             this.btnLimitNowSell.Name = "btnLimitNowSell";
             this.btnLimitNowSell.Size = new System.Drawing.Size(66, 80);
             this.btnLimitNowSell.TabIndex = 23;
-            this.btnLimitNowSell.Text = "Limit Sell";
+            this.btnLimitNowSell.Text = "Limit Sell\r\n[&E]";
             this.btnLimitNowSell.UseSelectable = true;
             this.btnLimitNowSell.Click += new System.EventHandler(this.btnLimitNowSell_Click);
             // 
@@ -1323,7 +1323,7 @@
             this.chkLimitNowTakeProfitBuy.AutoSize = true;
             this.chkLimitNowTakeProfitBuy.Location = new System.Drawing.Point(6, 200);
             this.chkLimitNowTakeProfitBuy.Name = "chkLimitNowTakeProfitBuy";
-            this.chkLimitNowTakeProfitBuy.Size = new System.Drawing.Size(77, 15);
+            this.chkLimitNowTakeProfitBuy.Size = new System.Drawing.Size(76, 15);
             this.chkLimitNowTakeProfitBuy.TabIndex = 40;
             this.chkLimitNowTakeProfitBuy.Text = "TakeProfit";
             this.chkLimitNowTakeProfitBuy.UseSelectable = true;
@@ -1563,7 +1563,7 @@
             this.btnLimitNowBuy.Name = "btnLimitNowBuy";
             this.btnLimitNowBuy.Size = new System.Drawing.Size(66, 80);
             this.btnLimitNowBuy.TabIndex = 21;
-            this.btnLimitNowBuy.Text = "Limit Buy";
+            this.btnLimitNowBuy.Text = "Limit Buy\r\n[&Q]\r\n";
             this.btnLimitNowBuy.UseSelectable = true;
             this.btnLimitNowBuy.Click += new System.EventHandler(this.btnLimitNowBuy_Click);
             // 
@@ -1751,7 +1751,7 @@
             this.label14.AutoSize = true;
             this.label14.Location = new System.Drawing.Point(92, 47);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(42, 19);
+            this.label14.Size = new System.Drawing.Size(43, 19);
             this.label14.TabIndex = 3;
             this.label14.Text = "Apart";
             // 
@@ -1905,7 +1905,7 @@
             this.label10.AutoSize = true;
             this.label10.Location = new System.Drawing.Point(92, 47);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(42, 19);
+            this.label10.Size = new System.Drawing.Size(43, 19);
             this.label10.TabIndex = 3;
             this.label10.Text = "Apart";
             // 
@@ -2017,7 +2017,7 @@
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(6, 21);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(88, 19);
+            this.label4.Size = new System.Drawing.Size(87, 19);
             this.label4.TabIndex = 33;
             this.label4.Text = "Contracts Per";
             // 
@@ -2171,7 +2171,7 @@
             this.lblDCASummary.AutoSize = true;
             this.lblDCASummary.Location = new System.Drawing.Point(6, 160);
             this.lblDCASummary.Name = "lblDCASummary";
-            this.lblDCASummary.Size = new System.Drawing.Size(96, 19);
+            this.lblDCASummary.Size = new System.Drawing.Size(97, 19);
             this.lblDCASummary.TabIndex = 32;
             this.lblDCASummary.Text = "DCA Summary";
             // 
@@ -2270,7 +2270,7 @@
             this.metroLabel4.AutoSize = true;
             this.metroLabel4.Location = new System.Drawing.Point(3, 199);
             this.metroLabel4.Name = "metroLabel4";
-            this.metroLabel4.Size = new System.Drawing.Size(85, 19);
+            this.metroLabel4.Size = new System.Drawing.Size(83, 19);
             this.metroLabel4.TabIndex = 40;
             this.metroLabel4.Text = "Trigger Price";
             // 
@@ -2280,7 +2280,7 @@
             this.lblStopTrailingLimitOffsetPrice.FontSize = MetroFramework.MetroLabelSize.Tall;
             this.lblStopTrailingLimitOffsetPrice.Location = new System.Drawing.Point(134, 218);
             this.lblStopTrailingLimitOffsetPrice.Name = "lblStopTrailingLimitOffsetPrice";
-            this.lblStopTrailingLimitOffsetPrice.Size = new System.Drawing.Size(70, 25);
+            this.lblStopTrailingLimitOffsetPrice.Size = new System.Drawing.Size(72, 25);
             this.lblStopTrailingLimitOffsetPrice.TabIndex = 39;
             this.lblStopTrailingLimitOffsetPrice.Text = "4564.65";
             // 
@@ -2363,7 +2363,7 @@
             this.lblStopTraillingPrice.FontSize = MetroFramework.MetroLabelSize.Tall;
             this.lblStopTraillingPrice.Location = new System.Drawing.Point(6, 218);
             this.lblStopTraillingPrice.Name = "lblStopTraillingPrice";
-            this.lblStopTraillingPrice.Size = new System.Drawing.Size(70, 25);
+            this.lblStopTraillingPrice.Size = new System.Drawing.Size(72, 25);
             this.lblStopTraillingPrice.TabIndex = 32;
             this.lblStopTraillingPrice.Text = "4654.65";
             // 
@@ -2394,7 +2394,7 @@
             this.metroLabel2.AutoSize = true;
             this.metroLabel2.Location = new System.Drawing.Point(94, 83);
             this.metroLabel2.Name = "metroLabel2";
-            this.metroLabel2.Size = new System.Drawing.Size(34, 19);
+            this.metroLabel2.Size = new System.Drawing.Size(32, 19);
             this.metroLabel2.TabIndex = 3;
             this.metroLabel2.Text = "Trail";
             // 
@@ -2403,7 +2403,7 @@
             this.metroLabel3.AutoSize = true;
             this.metroLabel3.Location = new System.Drawing.Point(94, 113);
             this.metroLabel3.Name = "metroLabel3";
-            this.metroLabel3.Size = new System.Drawing.Size(77, 19);
+            this.metroLabel3.Size = new System.Drawing.Size(76, 19);
             this.metroLabel3.TabIndex = 22;
             this.metroLabel3.Text = "Order Type";
             // 
@@ -2434,7 +2434,7 @@
             this.lblSettingsWebsocketInfo.AutoSize = true;
             this.lblSettingsWebsocketInfo.Location = new System.Drawing.Point(6, 157);
             this.lblSettingsWebsocketInfo.Name = "lblSettingsWebsocketInfo";
-            this.lblSettingsWebsocketInfo.Size = new System.Drawing.Size(106, 19);
+            this.lblSettingsWebsocketInfo.Size = new System.Drawing.Size(105, 19);
             this.lblSettingsWebsocketInfo.TabIndex = 6;
             this.lblSettingsWebsocketInfo.Text = "Websocket Info: ";
             // 
@@ -2566,7 +2566,7 @@
             this.metroLabel16.FontWeight = MetroFramework.MetroLabelWeight.Bold;
             this.metroLabel16.Location = new System.Drawing.Point(475, 310);
             this.metroLabel16.Name = "metroLabel16";
-            this.metroLabel16.Size = new System.Drawing.Size(358, 19);
+            this.metroLabel16.Size = new System.Drawing.Size(359, 19);
             this.metroLabel16.TabIndex = 8;
             this.metroLabel16.Text = "BTC:bc1qz8rvxacvhzp7rfc6untajvgl2ad3r3dhwhdzkz";
             // 
@@ -2687,7 +2687,7 @@
             this.btnPositionMarketClose.Size = new System.Drawing.Size(60, 40);
             this.btnPositionMarketClose.Style = MetroFramework.MetroColorStyle.Red;
             this.btnPositionMarketClose.TabIndex = 18;
-            this.btnPositionMarketClose.Text = "Market";
+            this.btnPositionMarketClose.Text = "Market\r\n[&X]";
             this.MetroToolTip.SetToolTip(this.btnPositionMarketClose, "Market Close Position");
             this.btnPositionMarketClose.UseSelectable = true;
             this.btnPositionMarketClose.UseStyleColors = true;
