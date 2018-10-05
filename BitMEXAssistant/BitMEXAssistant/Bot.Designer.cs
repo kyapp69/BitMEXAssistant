@@ -375,7 +375,7 @@
             this.TabControl.Controls.Add(this.tabVideos);
             this.TabControl.Location = new System.Drawing.Point(0, 125);
             this.TabControl.Name = "TabControl";
-            this.TabControl.SelectedIndex = 0;
+            this.TabControl.SelectedIndex = 1;
             this.TabControl.Size = new System.Drawing.Size(857, 394);
             this.TabControl.Style = MetroFramework.MetroColorStyle.White;
             this.TabControl.TabIndex = 14;
@@ -1034,7 +1034,7 @@
             // 
             this.nudLimitNowSellLevel.Location = new System.Drawing.Point(6, 97);
             this.nudLimitNowSellLevel.Maximum = new decimal(new int[] {
-            15,
+            20,
             0,
             0,
             0});
@@ -1351,7 +1351,7 @@
             // 
             this.nudLimitNowBuyLevel.Location = new System.Drawing.Point(5, 98);
             this.nudLimitNowBuyLevel.Maximum = new decimal(new int[] {
-            15,
+            20,
             0,
             0,
             0});

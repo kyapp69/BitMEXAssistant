@@ -2865,7 +2865,8 @@ namespace BitMEXAssistant
         private void CancelAllBuys()
         {
             Log("Cancelling All Buy orders");
-
+            if (LimitNowBuyOrders.Count == 0)
+                return;
             List<string> OrderIds = new List<string>();
             for (int i = 0; i < LimitNowBuyOrders.Count; i++)
             {
@@ -2894,6 +2895,8 @@ namespace BitMEXAssistant
         private void CancelAllSells()
         {
             Log("Cancelling All Sell orders");
+            if (LimitNowSellOrders.Count == 0)
+                return;
             List<string> OrderIds = new List<string>();
             for (int i = 0; i < LimitNowSellOrders.Count; i++)
             {
