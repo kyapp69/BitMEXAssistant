@@ -433,7 +433,7 @@
             this.btnManualLimitCancelOpenOrders.Size = new System.Drawing.Size(165, 33);
             this.btnManualLimitCancelOpenOrders.Style = MetroFramework.MetroColorStyle.Orange;
             this.btnManualLimitCancelOpenOrders.TabIndex = 18;
-            this.btnManualLimitCancelOpenOrders.Text = "Cancel All Orders[&Z]";
+            this.btnManualLimitCancelOpenOrders.Text = "Cancel All Orders[Z]";
             this.btnManualLimitCancelOpenOrders.UseSelectable = true;
             this.btnManualLimitCancelOpenOrders.UseStyleColors = true;
             this.btnManualLimitCancelOpenOrders.Click += new System.EventHandler(this.btnManualLimitCancelOpenOrders_Click);
@@ -846,7 +846,7 @@
             this.btnManualMarketSell.Size = new System.Drawing.Size(81, 80);
             this.btnManualMarketSell.Style = MetroFramework.MetroColorStyle.Red;
             this.btnManualMarketSell.TabIndex = 9;
-            this.btnManualMarketSell.Text = "Market Sell\r\n[&D]";
+            this.btnManualMarketSell.Text = "Market Sell\r\n[D]";
             this.btnManualMarketSell.UseSelectable = true;
             this.btnManualMarketSell.UseStyleColors = true;
             this.btnManualMarketSell.Click += new System.EventHandler(this.btnManualMarketSell_Click);
@@ -860,7 +860,7 @@
             this.btnManualMarketBuy.Size = new System.Drawing.Size(81, 80);
             this.btnManualMarketBuy.Style = MetroFramework.MetroColorStyle.Green;
             this.btnManualMarketBuy.TabIndex = 8;
-            this.btnManualMarketBuy.Text = "Market Buy\r\n[&A]";
+            this.btnManualMarketBuy.Text = "Market Buy\r\n[A]";
             this.btnManualMarketBuy.UseSelectable = true;
             this.btnManualMarketBuy.UseStyleColors = true;
             this.btnManualMarketBuy.Click += new System.EventHandler(this.btnManualMarketBuy_Click);
@@ -1242,11 +1242,11 @@
             // 
             this.btnLimitNowSell.BackColor = System.Drawing.Color.Red;
             this.btnLimitNowSell.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.btnLimitNowSell.Location = new System.Drawing.Point(165, 19);
+            this.btnLimitNowSell.Location = new System.Drawing.Point(164, 19);
             this.btnLimitNowSell.Name = "btnLimitNowSell";
             this.btnLimitNowSell.Size = new System.Drawing.Size(66, 80);
             this.btnLimitNowSell.TabIndex = 23;
-            this.btnLimitNowSell.Text = "Limit Sell\r\n[&E]";
+            this.btnLimitNowSell.Text = "Limit Sell\r\n[E]";
             this.btnLimitNowSell.UseSelectable = true;
             this.btnLimitNowSell.Click += new System.EventHandler(this.btnLimitNowSell_Click);
             // 
@@ -1258,7 +1258,7 @@
             this.btnLimitNowSellCancel.Name = "btnLimitNowSellCancel";
             this.btnLimitNowSellCancel.Size = new System.Drawing.Size(66, 80);
             this.btnLimitNowSellCancel.TabIndex = 30;
-            this.btnLimitNowSellCancel.Text = "Cancel Sell";
+            this.btnLimitNowSellCancel.Text = "Cancel Sell\r\n[E]";
             this.btnLimitNowSellCancel.UseSelectable = true;
             this.btnLimitNowSellCancel.Visible = false;
             this.btnLimitNowSellCancel.Click += new System.EventHandler(this.btnLimitNowSellCancel_Click);
@@ -1563,7 +1563,7 @@
             this.btnLimitNowBuy.Name = "btnLimitNowBuy";
             this.btnLimitNowBuy.Size = new System.Drawing.Size(66, 80);
             this.btnLimitNowBuy.TabIndex = 21;
-            this.btnLimitNowBuy.Text = "Limit Buy\r\n[&Q]\r\n";
+            this.btnLimitNowBuy.Text = "Limit Buy\r\n[Q]\r\n";
             this.btnLimitNowBuy.UseSelectable = true;
             this.btnLimitNowBuy.Click += new System.EventHandler(this.btnLimitNowBuy_Click);
             // 
@@ -1575,7 +1575,7 @@
             this.btnLimitNowBuyCancel.Name = "btnLimitNowBuyCancel";
             this.btnLimitNowBuyCancel.Size = new System.Drawing.Size(66, 80);
             this.btnLimitNowBuyCancel.TabIndex = 29;
-            this.btnLimitNowBuyCancel.Text = "Cancel Buy";
+            this.btnLimitNowBuyCancel.Text = "Cancel Buy\r\n[Q]";
             this.btnLimitNowBuyCancel.UseSelectable = true;
             this.btnLimitNowBuyCancel.Visible = false;
             this.btnLimitNowBuyCancel.Click += new System.EventHandler(this.btnLimitNowBuyCancel_Click);
@@ -2687,7 +2687,7 @@
             this.btnPositionMarketClose.Size = new System.Drawing.Size(60, 40);
             this.btnPositionMarketClose.Style = MetroFramework.MetroColorStyle.Red;
             this.btnPositionMarketClose.TabIndex = 18;
-            this.btnPositionMarketClose.Text = "Market\r\n[&X]";
+            this.btnPositionMarketClose.Text = "Market\r\n[X]";
             this.MetroToolTip.SetToolTip(this.btnPositionMarketClose, "Market Close Position");
             this.btnPositionMarketClose.UseSelectable = true;
             this.btnPositionMarketClose.UseStyleColors = true;

@@ -59,7 +59,7 @@ namespace BitMEXAssistant
         Dictionary<string, decimal> Prices = new Dictionary<string, decimal>();
         //List<Alert> Alerts = new List<Alert>();
 
-        public static string Version = "0.0.24";
+        public static string Version = "0.0.25";
 
         string LimitNowBuyOrderId = "";
         decimal LimitNowBuyOrderPrice = 0;
@@ -117,6 +117,7 @@ namespace BitMEXAssistant
         public Bot()
         {
             InitializeComponent();
+            this.KeyDown += Bot_KeyDown;
         }
 
         #region Bot Form Events
@@ -919,7 +920,7 @@ namespace BitMEXAssistant
                             //Console.WriteLine("User Websocket execution");
                             if (Message.ContainsKey("data"))
                             {
-                                Console.WriteLine("Execution Data:" + Message["data"]);
+                                //Console.WriteLine("Execution Data:" + Message["data"]);
                             }
                         }
                         else if ((string)Message["table"] == "order")
@@ -928,6 +929,125 @@ namespace BitMEXAssistant
                             if (Message.ContainsKey("data"))
                             {
                                 Console.WriteLine("Order Data:" + Message["data"]);
+                                // order data is a list of orders
+                                List<Order> Result = new List<Order>();
+                                //Console.WriteLine("Deserial OrderData");
+                                try
+                                {
+                                    Result = (JsonConvert.DeserializeObject<List<Order>>(Message["data"].ToString()));
+                                    //Console.WriteLine("Deserialize :" + Result.Count + " orders");
+                                    // check the results
+                                    bool HaveBuyOrders = false;
+                                    if (LimitNowBuyOrders.Count > 0)
+                                        HaveBuyOrders = true;
+                                    bool HaveSellOrders = false;
+                                    if (LimitNowSellOrders.Count > 0)
+                                        HaveSellOrders = true;
+                                    
+                                    if (Result.Count == 1 && Result[0].OrdStatus == "Filled")
+                                    {
+                                        Console.WriteLine("Filled");
+                                        if (LimitNowBuyOrders.Count > 0)
+                                        {
+                                            Console.WriteLine("Checking Buy Orders Filled:"+Result[0].OrderId);
+                                            int index = LimitNowBuyOrders.FindIndex(x => x.OrderId == Result[0].OrderId);
+                                            if (index >= 0)
+                                            {
+                                                if (LimitNowBuyOrders[index].OrdStatus == "New")
+                                                {
+                                                    // great it was an original order
+                                                    // mark it as filled 
+                                                    LimitNowBuyOrders[index].OrdStatus = "Filled";
+                                                }
+                                                else if (LimitNowBuyOrders[index].OrdStatus == "Filled")
+                                                {
+                                                    // probaby means it was closed
+                                                    LimitNowStopBuying();
+                                                }
+                                                    
+                                                //LimitNowBuyOrders.RemoveAt(index); // remove the mian order
+                                            }
+                                            else
+                                            {
+                                                Console.WriteLine("Can't find filled buy order");
+                                            }
+                                        }
+                                        if (LimitNowSellOrders.Count > 0)
+                                        {
+                                            Console.WriteLine("Checking Sell Orders Filled:"+Result[0].OrderId);
+                                            int index = LimitNowSellOrders.FindIndex(x => x.OrderId == Result[0].OrderId);
+                                            if (index >= 0)
+                                            {
+                                                if (LimitNowSellOrders[index].OrdStatus == "New")
+                                                {
+                                                    // great it was an original order
+                                                    // mark it as filled 
+                                                    LimitNowSellOrders[index].OrdStatus = "Filled";
+                                                    // we need to change the UI button
+
+                                                }
+                                                else if (LimitNowSellOrders[index].OrdStatus == "Filled")
+                                                {
+                                                    // probaby means it was closed
+                                                    LimitNowStopSelling();
+                                                }
+                                                //LimitNowSellOrders.RemoveAt(index); // remove the main order
+                                            }
+                                            else
+                                            {
+                                                Console.WriteLine("Can't find filled sell order");
+                                            }
+                                        }
+                                    }
+                                    
+                                    for (int i=0;i<Result.Count;i++)
+                                    {
+                                        if (Result[i].OrdStatus == "Canceled")
+                                        {
+                                            // see if we have it in or limit now stuff
+                                            if (LimitNowBuyOrders.Count > 0)
+                                            {
+                                                //Console.WriteLine("Checking Buy Orders");
+                                                int index = LimitNowBuyOrders.FindIndex(x=>x.OrderId == Result[i].OrderId);
+                                                if (index>=0)
+                                                {
+                                                    LimitNowBuyOrders.RemoveAt(index);
+                                                }
+                                                else
+                                                {
+                                                    Console.WriteLine("Unable to find ID:" + Result[i].OrderId);
+                                                }
+                                            }
+                                            if (LimitNowSellOrders.Count > 0)
+                                            {
+                                                //Console.WriteLine("Checking Sell Orders");
+                                                int index = LimitNowSellOrders.FindIndex(x => x.OrderId == Result[i].OrderId);
+                                                if (index >= 0)
+                                                {
+                                                    LimitNowSellOrders.RemoveAt(index);
+                                                }
+                                                else
+                                                {
+                                                    Console.WriteLine("Unable to find ID:" + Result[i].OrderId);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (HaveBuyOrders && LimitNowBuyOrders.Count == 0)
+                                    {
+                                        LimitNowStopBuying();
+                                    }
+                                    if (HaveSellOrders && LimitNowSellOrders.Count == 0)
+                                    {
+                                        LimitNowStopSelling();
+                                    }
+                                    //Console.WriteLine("BuyOrders:" + LimitNowBuyOrders.Count);
+                                    //Console.WriteLine("SellOrders:" + LimitNowSellOrders.Count);
+                                }
+                                catch (Exception eOrder)
+                                {
+
+                                }
                             }
                         }
                     }
@@ -2271,11 +2391,15 @@ namespace BitMEXAssistant
                 //Console.WriteLine("Buy waited");
                 if (LimitNowBuyOrders.Count > 0)
                 {
-                    decimal Price = LimitNowGetOrderPrice("Buy");
-                    if (CheckOrderPrices(LimitNowBuyOrders, Price))
+                    Order mainOrder = LimitNowBuyOrders.Find(x => x.ContingencyType == "OneTriggersTheOther");
+                    if (mainOrder != null && (mainOrder.OrdStatus == "" || mainOrder.OrdStatus == "New"))
                     {
-                        Log("LimitNow Updating Buy order");
-                        tmrLimitNowBuy_Tick(this, EventArgs.Empty);
+                        decimal Price = LimitNowGetOrderPrice("Buy");
+                        if (CheckOrderPrices(LimitNowBuyOrders, Price))
+                        {
+                            Log("LimitNow Updating Buy order");
+                            tmrLimitNowBuy_Tick(this, EventArgs.Empty);
+                        }
                     }
                 }
                 UpdateLimitNowBuys.Reset();
@@ -2291,11 +2415,15 @@ namespace BitMEXAssistant
                 //Console.WriteLine("Sell waited");
                 if (LimitNowSellOrders.Count > 0)
                 {
-                    decimal Price = LimitNowGetOrderPrice("Sell");
-                    if (CheckOrderPrices(LimitNowSellOrders, Price))
+                    Order mainOrder = LimitNowSellOrders.Find(x => x.ContingencyType == "OneTriggersTheOther");
+                    if (mainOrder!=null && (mainOrder.OrdStatus=="" || mainOrder.OrdStatus == "New"))
                     {
-                        Log("LimitNow Updating Sell order");
-                        tmrLimitNowSell_Tick(this, EventArgs.Empty);
+                        decimal Price = LimitNowGetOrderPrice("Sell");
+                        if (CheckOrderPrices(LimitNowSellOrders, Price))
+                        {
+                            Log("LimitNow Updating Sell order");
+                            tmrLimitNowSell_Tick(this, EventArgs.Empty);
+                        }
                     }
                 }
                 UpdateLimitNowSells.Reset();
@@ -2310,11 +2438,13 @@ namespace BitMEXAssistant
 
         private void btnLimitNowBuy_Click(object sender, EventArgs e)
         {
+            Log("LimitNow Buy clicked");
             LimitNowBuyOrders = LimitNowStartBuying();
         }
 
         private void btnLimitNowSell_Click(object sender, EventArgs e)
         {
+            Log("LimitNow Sell clicked");
             LimitNowSellOrders = LimitNowStartSelling();
         }
 
@@ -2496,6 +2626,25 @@ namespace BitMEXAssistant
                     if (res.Contains("Error"))
                     {
                         Log("Amend Buying price error:"+res);
+                        if (res.Contains("Overload"))
+                        {
+                            Log("System Overload");
+                            try
+                            {
+                                JObject Msg = JObject.Parse(res);
+                                if (Msg.ContainsKey("error"))
+                                {
+                                    JObject ErrorMsg = (JObject)Msg["error"];
+                                    Log("Error Message:" + ErrorMsg["message"]);
+                                    Log("Error Name:" + ErrorMsg["name"]);
+                                }
+                            }
+                            catch(Exception e)
+                            {
+
+                            }
+                            return LimitNowBuyOrders;
+                        }
                         return LimitNowOrderResult;
                     }
                     //Console.WriteLine("Amend Buying return:" + res);
@@ -2556,6 +2705,25 @@ namespace BitMEXAssistant
                     if (res.Contains("Error"))
                     {
                         Log("Amend Selling price error:"+res);
+                        if (res.Contains("Overload"))
+                        {
+                            Log("System Overload");
+                            try
+                            {
+                                JObject Msg = JObject.Parse(res);
+                                if (Msg.ContainsKey("error"))
+                                {
+                                    JObject ErrorMsg = (JObject)Msg["error"];
+                                    Log("Error Message:" + ErrorMsg["message"]);
+                                    Log("Error Name:" + ErrorMsg["name"]);
+                                }
+                            }
+                            catch (Exception e)
+                            {
+
+                            }
+                            return LimitNowSellOrders;
+                        }
                         return LimitNowOrderResult;
                     }
                     LimitNowOrderResult = (JsonConvert.DeserializeObject<List<Order>>(res));
@@ -2698,10 +2866,12 @@ namespace BitMEXAssistant
         {
             Log("Cancelling All Buy orders");
 
+            List<string> OrderIds = new List<string>();
             for (int i = 0; i < LimitNowBuyOrders.Count; i++)
             {
-                bitmex.CancelOrder(LimitNowBuyOrders[i].OrderId);
+                OrderIds.Add(LimitNowBuyOrders[i].OrderId);
             }
+            bitmex.CancelOrder(OrderIds.ToArray());
             LimitNowBuyOrders.Clear();
             LimitNowBuyOrderPrice = 0;
         }
@@ -2724,10 +2894,12 @@ namespace BitMEXAssistant
         private void CancelAllSells()
         {
             Log("Cancelling All Sell orders");
+            List<string> OrderIds = new List<string>();
             for (int i = 0; i < LimitNowSellOrders.Count; i++)
             {
-                bitmex.CancelOrder(LimitNowSellOrders[i].OrderId);
+                OrderIds.Add(LimitNowSellOrders[i].OrderId);
             }
+            bitmex.CancelOrder(OrderIds.ToArray());
             LimitNowSellOrders.Clear();
             LimitNowSellOrderPrice = 0;
         }
@@ -3418,11 +3590,17 @@ namespace BitMEXAssistant
             {
                 case Keys.Q:
                     Console.WriteLine("Limit now buy");
-                    btnLimitNowBuy_Click(this, EventArgs.Empty);
+                    if (btnLimitNowBuy.Visible)
+                        btnLimitNowBuy_Click(this, EventArgs.Empty);
+                    else
+                        btnLimitNowBuyCancel_Click(this, EventArgs.Empty);
                     break;
                 case Keys.E:
                     Console.WriteLine("Limit now sell");
-                    btnLimitNowSell_Click(this, EventArgs.Empty);
+                    if (btnLimitNowSell.Visible)
+                        btnLimitNowSell_Click(this, EventArgs.Empty);
+                    else
+                        btnLimitNowSellCancel_Click(this, EventArgs.Empty);
                     break;
                 case Keys.A:
                     Console.WriteLine("Market buy");

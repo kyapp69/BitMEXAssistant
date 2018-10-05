@@ -937,10 +937,12 @@ namespace BitMEX
             }
         }
 
-        public List<Order> CancelOrder(string OrderId)
+        public List<Order> CancelOrder(string [] OrderId)
         {
+            Console.WriteLine("Cancel Order");
             var param = new Dictionary<string, string>();
-            param["orderID"] = OrderId;
+            string orders = JsonConvert.SerializeObject(OrderId);
+            param["orderID"] = orders;
             
             string res = Query("DELETE", "/order", param, true);
             int RetryAttemptCount = 0;
