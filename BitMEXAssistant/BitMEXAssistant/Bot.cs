@@ -59,7 +59,7 @@ namespace BitMEXAssistant
         Dictionary<string, decimal> Prices = new Dictionary<string, decimal>();
         //List<Alert> Alerts = new List<Alert>();
 
-        public static string Version = "0.0.25";
+        public static string Version = "0.0.251";
 
         string LimitNowBuyOrderId = "";
         decimal LimitNowBuyOrderPrice = 0;
@@ -3041,7 +3041,7 @@ namespace BitMEXAssistant
                             }
                             else
                             {
-                                Log("Buy Best Price Unable to set Price:Highest bid is the same as asking:" + HighestBid + ":" + LimitNowBuyOrderPrice);
+                                //Log("Buy Best Price Unable to set Price:Highest bid is the same as asking:" + HighestBid + ":" + LimitNowBuyOrderPrice);
                             }
 
                         }
@@ -3094,7 +3094,7 @@ namespace BitMEXAssistant
                             }
                             else
                             {
-                                Log("Sell Best Price Unable to set Price:Lowest ask is the same as asking:" + LowestAsk + ":" + LimitNowSellOrderPrice);
+                                //Log("Sell Best Price Unable to set Price:Lowest ask is the same as asking:" + LowestAsk + ":" + LimitNowSellOrderPrice);
                             }
                         }
                         else if (LimitNowSellMethod == "Quick Fill")

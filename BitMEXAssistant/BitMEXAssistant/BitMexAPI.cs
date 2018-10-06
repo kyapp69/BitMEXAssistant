@@ -354,7 +354,7 @@ namespace BitMEX
             limitOrder.ContingencyType = "OneTriggersTheOther";
 
 
-            //limitOrder.ClOrdID = Guid.NewGuid().ToString();
+            limitOrder.ClOrdID = Guid.NewGuid().ToString();
             limitOrder.ClOrdLinkID = Guid.NewGuid().ToString();
             //string order = JsonConvert.SerializeObject(limitOrder);
             // now we create the OTO order
@@ -389,7 +389,7 @@ namespace BitMEX
             {
                 OTOOrder.ExecInst = "0";
             }
-            //OTOOrder.ClOrdID = Guid.NewGuid().ToString();
+            OTOOrder.ClOrdID = Guid.NewGuid().ToString();
             OTOOrder.ClOrdLinkID = limitOrder.ClOrdLinkID;
             // do a close order
             /*
@@ -504,6 +504,9 @@ namespace BitMEX
                 param["displayQty"] = "0";
             }
 
+            param["contingencyType"] = "OneTriggersTheOther";
+            param["clOrdLinkID"] = Guid.NewGuid().ToString();
+            param["clOrdID"] = Guid.NewGuid().ToString();
             string res = "";
             try
             {
@@ -569,6 +572,7 @@ namespace BitMEX
                 limitOrder.ExecInst = "0";
             }
             limitOrder.ContingencyType = "OneTriggersTheOther";
+            limitOrder.ClOrdID = Guid.NewGuid().ToString();
 
             limitOrder.ClOrdLinkID = Guid.NewGuid().ToString();
 
@@ -615,7 +619,7 @@ namespace BitMEX
                     StopLossOrder.ExecInst = "0";
                 }
                 StopLossOrder.ExecInst += ",LastPrice";
-                //OTOOrder.ClOrdID = Guid.NewGuid().ToString();
+                StopLossOrder.ClOrdID = Guid.NewGuid().ToString();
                 StopLossOrder.ClOrdLinkID = limitOrder.ClOrdLinkID;
                 orders.Add(StopLossOrder);
             }
@@ -657,7 +661,7 @@ namespace BitMEX
                     TakeProfitOrder.ExecInst = "0";
                 }
                 TakeProfitOrder.ExecInst += ",LastPrice";
-                //OTOOrder.ClOrdID = Guid.NewGuid().ToString();
+                TakeProfitOrder.ClOrdID = Guid.NewGuid().ToString();
                 TakeProfitOrder.ClOrdLinkID = limitOrder.ClOrdLinkID;
                 orders.Add(TakeProfitOrder);
             }
