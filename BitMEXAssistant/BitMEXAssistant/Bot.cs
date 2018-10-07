@@ -646,13 +646,13 @@ namespace BitMEXAssistant
                                     }
                                     if (TD.Children().LastOrDefault()["unrealisedPnlPcnt"] != null)
                                     {
-                                        Console.WriteLine("PnlPcnt:" + (decimal?)TD.Children().LastOrDefault()["unrealisedPnlPcnt"]);
+                                        //Console.WriteLine("PnlPcnt:" + (decimal?)TD.Children().LastOrDefault()["unrealisedPnlPcnt"]);
                                         SymbolPosition.UnrealisedPnlPcnt = (decimal?)TD.Children().LastOrDefault()["unrealisedPnlPcnt"];
 
                                     }
                                     if (TD.Children().LastOrDefault()["unrealisedRoePcnt"] != null)
                                     {
-                                        Console.WriteLine("ROEPnlPcnt:" + (decimal?)TD.Children().LastOrDefault()["unrealisedRoePcnt"]);
+                                        //Console.WriteLine("ROEPnlPcnt:" + (decimal?)TD.Children().LastOrDefault()["unrealisedRoePcnt"]);
                                         SymbolPosition.UnrealisedPnlPcnt = (decimal?)TD.Children().LastOrDefault()["unrealisedRoePcnt"];
 
                                     }
@@ -920,7 +920,7 @@ namespace BitMEXAssistant
                             //Console.WriteLine("User Websocket execution");
                             if (Message.ContainsKey("data"))
                             {
-                                //Console.WriteLine("Execution Data:" + Message["data"]);
+                                Console.WriteLine("Execution Data:" + Message["data"]);
                             }
                         }
                         else if ((string)Message["table"] == "order")
@@ -946,10 +946,10 @@ namespace BitMEXAssistant
                                     
                                     if (Result.Count == 1 && Result[0].OrdStatus == "Filled")
                                     {
-                                        Console.WriteLine("Filled");
+                                        //Console.WriteLine("Filled");
                                         if (LimitNowBuyOrders.Count > 0)
                                         {
-                                            Console.WriteLine("Checking Buy Orders Filled:"+Result[0].OrderId);
+                                            //Console.WriteLine("Checking Buy Orders Filled:"+Result[0].OrderId);
                                             int index = LimitNowBuyOrders.FindIndex(x => x.OrderId == Result[0].OrderId);
                                             if (index >= 0)
                                             {
@@ -958,6 +958,8 @@ namespace BitMEXAssistant
                                                     // great it was an original order
                                                     // mark it as filled 
                                                     LimitNowBuyOrders[index].OrdStatus = "Filled";
+                                                    LimitNowBuyOrders.Clear();
+                                                    LimitNowStopBuying();
                                                 }
                                                 else if (LimitNowBuyOrders[index].OrdStatus == "Filled")
                                                 {
@@ -974,7 +976,7 @@ namespace BitMEXAssistant
                                         }
                                         if (LimitNowSellOrders.Count > 0)
                                         {
-                                            Console.WriteLine("Checking Sell Orders Filled:"+Result[0].OrderId);
+                                            //Console.WriteLine("Checking Sell Orders Filled:"+Result[0].OrderId);
                                             int index = LimitNowSellOrders.FindIndex(x => x.OrderId == Result[0].OrderId);
                                             if (index >= 0)
                                             {
@@ -984,6 +986,8 @@ namespace BitMEXAssistant
                                                     // mark it as filled 
                                                     LimitNowSellOrders[index].OrdStatus = "Filled";
                                                     // we need to change the UI button
+                                                    LimitNowSellOrders.Clear();
+                                                    LimitNowStopSelling();
 
                                                 }
                                                 else if (LimitNowSellOrders[index].OrdStatus == "Filled")
@@ -2705,7 +2709,7 @@ namespace BitMEXAssistant
                     if (res.Contains("Error"))
                     {
                         Log("Amend Selling price error:"+res);
-                        if (res.Contains("Overload"))
+                        if (res.Contains("load"))
                         {
                             Log("System Overload");
                             try
@@ -2726,7 +2730,14 @@ namespace BitMEXAssistant
                         }
                         return LimitNowOrderResult;
                     }
-                    LimitNowOrderResult = (JsonConvert.DeserializeObject<List<Order>>(res));
+                    try
+                    {
+                        LimitNowOrderResult = (JsonConvert.DeserializeObject<List<Order>>(res));
+                    }
+                    catch (Exception e)
+                    {
+                        // failed to convert.. usually rwsult is bad gateway
+                    }
                 }
                 LimitNowSellOrderPrice = Price;
             }
@@ -3616,6 +3627,8 @@ namespace BitMEXAssistant
                 case Keys.X:
                     Console.WriteLine("Market close position");
                     btnPositionMarketClose_Click(this, EventArgs.Empty);
+                    // we also close all the stops
+                    bitmex.CancelAllOpenOrders(ActiveInstrument.Symbol);
                     break;
                 case Keys.Z:
                     Console.WriteLine("Cancel all orders");
