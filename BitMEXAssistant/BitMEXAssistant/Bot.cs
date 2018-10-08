@@ -1,6 +1,7 @@
 ﻿#define USE_SEPARATE_THREADS
 #define USE_LOCALTIME
 #define USE_L2
+#define TRIGGERED_STOPS
 using BitMEX;
 using CsvHelper;
 using Newtonsoft.Json;
@@ -59,7 +60,7 @@ namespace BitMEXAssistant
         Dictionary<string, decimal> Prices = new Dictionary<string, decimal>();
         //List<Alert> Alerts = new List<Alert>();
 
-        public static string Version = "0.0.251";
+        public static string Version = "0.0.26";
 
         string LimitNowBuyOrderId = "";
         decimal LimitNowBuyOrderPrice = 0;
@@ -1763,10 +1764,13 @@ namespace BitMEXAssistant
                 Side = "Sell";
                 Size = (int)Math.Abs((decimal)Size); // Makes sure size is positive number
             }
+            bitmex.MarketClosePosition(ActiveInstrument.Symbol, Side);
+            /*
             if (Size != 0)
             {
                 bitmex.MarketOrder(ActiveInstrument.Symbol, Side, Size, true);
             }
+            */
         }
 
         private void btnPositionLimitClose_Click(object sender, EventArgs e)
@@ -2613,12 +2617,20 @@ namespace BitMEXAssistant
                             if (LimitNowBuyOrders[i].Side == "Sell" && LimitNowBuyOrders[i].OrdType == "StopLimit")
                             {
                                 LimitNowBuyOrders[i].Price = Price - ActiveInstrument.TickSize * LimitNowStopLossBuyDelta;
+#if TRIGGERED_STOPS
+                                LimitNowBuyOrders[i].StopPx = Price;
+#else
                                 LimitNowBuyOrders[i].StopPx = LimitNowBuyOrders[i].Price + ActiveInstrument.TickSize;
+#endif                           
                             }
                             if (LimitNowBuyOrders[i].Side == "Sell" && LimitNowBuyOrders[i].OrdType == "LimitIfTouched")
                             {
                                 LimitNowBuyOrders[i].Price = Price + ActiveInstrument.TickSize * LimitNowTakeProfitBuyDelta;
+#if TRIGGERED_STOPS
+                                LimitNowBuyOrders[i].StopPx = Price;
+#else
                                 LimitNowBuyOrders[i].StopPx = LimitNowBuyOrders[i].Price - ActiveInstrument.TickSize;
+#endif                      
                             }
                         }
                         //LimitNowBuyOrders[i].OrdStatus = "";
@@ -2630,7 +2642,7 @@ namespace BitMEXAssistant
                     if (res.Contains("Error"))
                     {
                         Log("Amend Buying price error:"+res);
-                        if (res.Contains("Overload"))
+                        if (res.Contains("load"))
                         {
                             Log("System Overload");
                             try
@@ -2690,12 +2702,20 @@ namespace BitMEXAssistant
                             if (LimitNowSellOrders[i].Side == "Buy" && LimitNowSellOrders[i].OrdType == "StopLimit")
                             {
                                 LimitNowSellOrders[i].Price = Price + ActiveInstrument.TickSize * LimitNowStopLossSellDelta;
+#if TRIGGERED_STOPS
+                                LimitNowSellOrders[i].StopPx = Price;
+#else
                                 LimitNowSellOrders[i].StopPx = LimitNowSellOrders[i].Price - ActiveInstrument.TickSize;
+#endif                       
                             }
                             if (LimitNowSellOrders[i].Side == "Buy" && LimitNowSellOrders[i].OrdType == "LimitIfTouched")
                             {
                                 LimitNowSellOrders[i].Price = Price - ActiveInstrument.TickSize * LimitNowTakeProfitSellDelta;
+#if TRIGGERED_STOPS
+                                LimitNowSellOrders[i].StopPx = Price;
+#else
                                 LimitNowSellOrders[i].StopPx = LimitNowSellOrders[i].Price + ActiveInstrument.TickSize;
+#endif                     
                             }
                         }
                         //LimitNowSellOrders[i].OrdStatus = "";

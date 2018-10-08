@@ -230,7 +230,41 @@ namespace BitMEX
 
         #region Our Calls
 
+        public List<Order> MarketClosePosition(string Symbol, string Side)
+        {
+            var param = new Dictionary<string, string>();
+            param["symbol"] = Symbol;
+            param["side"] = Side;
+            param["orderQty"] = "0";
+            param["ordType"] = "Market";
+            param["execInst"] = "Close";
 
+            string res = Query("POST", "/order", param, true);
+            int RetryAttemptCount = 0;
+            int MaxRetries = RetryAttempts(res);
+            while (res.Contains("error") && RetryAttemptCount < MaxRetries)
+            {
+                errors.Add(res);
+                Thread.Sleep(BitMEXAssistant.Properties.Settings.Default.RetryAttemptWaitTime); // Force app to wait 500ms
+                res = Query("POST", "/order", param, true);
+                RetryAttemptCount++;
+                if (RetryAttemptCount == MaxRetries)
+                {
+                    errors.Add("Max rety attempts of " + MaxRetries.ToString() + " reached.");
+                    break;
+                }
+            }
+            try
+            {
+                List<Order> Result = new List<Order>();
+                Result.Add(JsonConvert.DeserializeObject<Order>(res));
+                return Result;
+            }
+            catch (Exception ex)
+            {
+                return new List<Order>();
+            }
+        }
         #region Ordering
         public List<Order> MarketOrder(string Symbol, string Side, int Quantity, bool ReduceOnly = false)
         {
@@ -592,13 +626,21 @@ namespace BitMEX
                 {
                     StopLossOrder.Side = "Sell";
                     StopLossOrder.Price = Price - StopLossDelta;
+#if TRIGGERED_STOPS
+                    StopLossOrder.StopPx = Price;
+#else
                     StopLossOrder.StopPx = StopLossOrder.Price + TickSize;
+#endif
                 }
                 else
                 {
                     StopLossOrder.Side = "Buy";
                     StopLossOrder.Price = Price + StopLossDelta;
+#if TRIGGERED_STOPS
+                    StopLossOrder.StopPx = Price;
+#else
                     StopLossOrder.StopPx = StopLossOrder.Price - TickSize;
+#endif
                 }
                 StopLossOrder.OrderQty = Quantity;
                 StopLossOrder.OrdType = "StopLimit";
@@ -634,13 +676,21 @@ namespace BitMEX
                 {
                     TakeProfitOrder.Side = "Sell";
                     TakeProfitOrder.Price = Price + TakeProfitDelta;
+#if TRIGGERED_STOPS
+                    TakeProfitOrder.StopPx = Price;
+#else
                     TakeProfitOrder.StopPx = TakeProfitOrder.Price - TickSize;
+#endif
                 }
                 else
                 {
                     TakeProfitOrder.Side = "Buy";
                     TakeProfitOrder.Price = Price - TakeProfitDelta;
+#if TRIGGERED_STOPS
+                    TakeProfitOrder.StopPx = Price;
+#else
                     TakeProfitOrder.StopPx = TakeProfitOrder.Price + TickSize;
+#endif
                 }
                 TakeProfitOrder.OrderQty = Quantity;
                 TakeProfitOrder.OrdType = "LimitIfTouched";
@@ -681,7 +731,7 @@ namespace BitMEX
             }
 
 #else
-            var param = new Dictionary<string, string>();
+                    var param = new Dictionary<string, string>();
             param["symbol"] = Symbol;
             param["side"] = Side;
             param["orderQty"] = Quantity.ToString();
@@ -732,7 +782,7 @@ namespace BitMEX
                 return new List<Order>();
             }
 #endif
-            return new List<Order>();
+                    return new List<Order>();
         }
 
         public List<Order> LimitNowOrderBreakout(string Symbol, string Side, int Quantity, decimal Price, bool ReduceOnly = false, bool PostOnly = false, bool Hidden = false)
@@ -1071,7 +1121,7 @@ namespace BitMEX
         }
 
 
-        #endregion
+#endregion
 
 
         public List<Instrument> GetAllInstruments()
@@ -1097,6 +1147,7 @@ namespace BitMEX
             }
             catch (Exception ex)
             {
+                
                 return new List<Instrument>();
             }
         }
