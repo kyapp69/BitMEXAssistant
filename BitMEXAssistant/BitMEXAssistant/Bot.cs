@@ -60,7 +60,7 @@ namespace BitMEXAssistant
         Dictionary<string, decimal> Prices = new Dictionary<string, decimal>();
         //List<Alert> Alerts = new List<Alert>();
 
-        public static string Version = "0.0.26";
+        public static string Version = "0.0.27";
 
         string LimitNowBuyOrderId = "";
         decimal LimitNowBuyOrderPrice = 0;
@@ -106,6 +106,9 @@ namespace BitMEXAssistant
         decimal LimitNowStopLossBuyDelta = decimal.Zero;
         decimal LimitNowTakeProfitSellDelta = decimal.Zero;
         decimal LimitNowTakeProfitBuyDelta = decimal.Zero;
+
+        bool LimitNowSellSLUseMarket = false;
+        bool LimitNowBuySLUseMarket = false;
 
         int LimitNowBuyLevel = 0;
         int LimitNowSellLevel = 0;
@@ -1322,6 +1325,9 @@ namespace BitMEXAssistant
             LimitNowSellTicksFromCenter = Properties.Settings.Default.LimitNowSellTicksFromCenter;
             LimitNowBuyTicksFromCenter = Properties.Settings.Default.LimitNowBuyTicksFromCenter;
 
+            chkLimitNowBuySLMarket.Checked = Properties.Settings.Default.LimitNowBuySLMarket;
+            chkLimitNowSellSLMarket.Checked = Properties.Settings.Default.LimitNowSellSLMarket;
+
             // Trailing Stop
             nudStopTrailingContracts.Value = Properties.Settings.Default.TrailingStopContracts;
             ddlStopTrailingMethod.SelectedItem = Properties.Settings.Default.TrailingStopMethod;
@@ -2497,7 +2503,8 @@ namespace BitMEXAssistant
                         StopLossDelta = 0m;
                     if (!chkLimitNowTakeProfitBuy.Checked)
                         TakeProfitDelta = 0m;
-                    LimitNowOrderResult = bitmex.LimitNowOrderSafety(ActiveInstrument.Symbol, "Buy", (int)nudLimitNowBuyContracts.Value, Price, StopLossDelta, TakeProfitDelta, ActiveInstrument.TickSize, chkLimitNowBuyReduceOnly.Checked, true, false);
+                    LimitNowOrderResult = bitmex.LimitNowOrderSafety(ActiveInstrument.Symbol, "Buy", (int)nudLimitNowBuyContracts.Value, Price, StopLossDelta, TakeProfitDelta, 
+                        ActiveInstrument.TickSize, chkLimitNowBuySLMarket.Checked, chkLimitNowBuyReduceOnly.Checked,true, false);
                 }
                 else
                 {
@@ -2553,7 +2560,8 @@ namespace BitMEXAssistant
                         StopLossDelta = 0m;
                     if (!chkLimitNowTakeProfitSell.Checked)
                         TakeProfitDelta = 0m;
-                    LimitNowOrderResult = bitmex.LimitNowOrderSafety(ActiveInstrument.Symbol, "Sell", (int)nudLimitNowSellContracts.Value, Price, StopLossDelta, TakeProfitDelta, ActiveInstrument.TickSize, chkLimitNowSellReduceOnly.Checked, true, false);
+                    LimitNowOrderResult = bitmex.LimitNowOrderSafety(ActiveInstrument.Symbol, "Sell", (int)nudLimitNowSellContracts.Value, Price, StopLossDelta, TakeProfitDelta, 
+                        ActiveInstrument.TickSize, chkLimitNowSellSLMarket.Checked, chkLimitNowSellReduceOnly.Checked,true, false);
                 }
                 else
                 {
@@ -2614,24 +2622,62 @@ namespace BitMEXAssistant
                         LimitNowBuyOrders[i].OrderQty = Contracts;
                         if (LimitNowBuyOrders[i].ContingencyType == "OneCancelsTheOther" || true)
                         {
-                            if (LimitNowBuyOrders[i].Side == "Sell" && LimitNowBuyOrders[i].OrdType == "StopLimit")
+                            if (LimitNowBuyOrders[i].Side == "Sell")
                             {
-                                LimitNowBuyOrders[i].Price = Price - ActiveInstrument.TickSize * LimitNowStopLossBuyDelta;
-#if TRIGGERED_STOPS
-                                LimitNowBuyOrders[i].StopPx = Price;
-#else
-                                LimitNowBuyOrders[i].StopPx = LimitNowBuyOrders[i].Price + ActiveInstrument.TickSize;
-#endif                           
+                                if (LimitNowBuyOrders[i].OrdType == "StopLimit")
+                                {
+                                    LimitNowBuyOrders[i].Price = Price - ActiveInstrument.TickSize * LimitNowStopLossBuyDelta;
+                                    LimitNowBuyOrders[i].StopPx = LimitNowBuyOrders[i].Price;
+                                }
+                                if (LimitNowBuyOrders[i].OrdType == "Stop")
+                                {
+                                    LimitNowBuyOrders[i].Price = null;
+                                    LimitNowBuyOrders[i].StopPx = Price - ActiveInstrument.TickSize * LimitNowStopLossBuyDelta;
+                                }
+                                if (LimitNowBuyOrders[i].OrdType == "Limit")
+                                {
+                                    LimitNowBuyOrders[i].Price = Price + ActiveInstrument.TickSize * LimitNowTakeProfitBuyDelta;
+                                }
+                                if (LimitNowBuyOrders[i].OrdType == "LimitIfTouched")
+                                {
+                                    LimitNowBuyOrders[i].Price = Price + ActiveInstrument.TickSize * LimitNowTakeProfitBuyDelta;
+                                    LimitNowBuyOrders[i].StopPx = Price + ActiveInstrument.TickSize * LimitNowTakeProfitBuyDelta;
+                                }
+                                if (LimitNowBuyOrders[i].OrdType == "MarketIfTouched")
+                                {
+                                    LimitNowBuyOrders[i].Price = null;
+                                    LimitNowBuyOrders[i].StopPx = Price + ActiveInstrument.TickSize * LimitNowTakeProfitBuyDelta;
+                                }
                             }
-                            if (LimitNowBuyOrders[i].Side == "Sell" && LimitNowBuyOrders[i].OrdType == "LimitIfTouched")
-                            {
-                                LimitNowBuyOrders[i].Price = Price + ActiveInstrument.TickSize * LimitNowTakeProfitBuyDelta;
-#if TRIGGERED_STOPS
-                                LimitNowBuyOrders[i].StopPx = Price;
-#else
-                                LimitNowBuyOrders[i].StopPx = LimitNowBuyOrders[i].Price - ActiveInstrument.TickSize;
-#endif                      
-                            }
+                            /*
+                                                        if (LimitNowBuyOrders[i].Side == "Sell" && LimitNowBuyOrders[i].OrdType == "StopLimit")
+                                                        {
+                                                            LimitNowBuyOrders[i].Price = Price - ActiveInstrument.TickSize * LimitNowStopLossBuyDelta;
+                            #if TRIGGERED_STOPS
+                            #if PRICE_TRIGGER
+                                                            LimitNowBuyOrders[i].StopPx = Price;
+                            #else
+                                                            LimitNowBuyOrders[i].StopPx = Price - ActiveInstrument.TickSize;
+                            #endif                      
+                            #else
+                                                            LimitNowBuyOrders[i].StopPx = LimitNowBuyOrders[i].Price + ActiveInstrument.TickSize;
+                            #endif                           
+                                                        }
+                                                        if (LimitNowBuyOrders[i].Side == "Sell" && LimitNowBuyOrders[i].OrdType == "LimitIfTouched")
+                                                        {
+                                                            LimitNowBuyOrders[i].Price = Price + ActiveInstrument.TickSize * LimitNowTakeProfitBuyDelta;
+                            #if TRIGGERED_STOPS
+                            #if PRICE_TRIGGER
+                                                            LimitNowBuyOrders[i].StopPx = Price;
+                            #else
+                                                            LimitNowBuyOrders[i].StopPx = Price + ActiveInstrument.TickSize;
+                            #endif                          
+                            #else
+                                                            LimitNowBuyOrders[i].StopPx = LimitNowBuyOrders[i].Price - ActiveInstrument.TickSize;
+                            #endif
+                                                        }
+                            */
+
                         }
                         //LimitNowBuyOrders[i].OrdStatus = "";
                         OrderAmend order = new OrderAmend(LimitNowBuyOrders[i]);
@@ -2699,24 +2745,62 @@ namespace BitMEXAssistant
                         LimitNowSellOrders[i].OrderQty = Contracts;
                         if (LimitNowSellOrders[i].ContingencyType == "OneCancelsTheOther" || true)
                         {
-                            if (LimitNowSellOrders[i].Side == "Buy" && LimitNowSellOrders[i].OrdType == "StopLimit")
+                            if (LimitNowSellOrders[i].Side == "Buy")
                             {
-                                LimitNowSellOrders[i].Price = Price + ActiveInstrument.TickSize * LimitNowStopLossSellDelta;
-#if TRIGGERED_STOPS
-                                LimitNowSellOrders[i].StopPx = Price;
-#else
-                                LimitNowSellOrders[i].StopPx = LimitNowSellOrders[i].Price - ActiveInstrument.TickSize;
-#endif                       
+                                if (LimitNowSellOrders[i].OrdType == "StopLimit")
+                                {
+                                    LimitNowSellOrders[i].Price = Price + ActiveInstrument.TickSize * LimitNowStopLossSellDelta;
+                                    LimitNowSellOrders[i].StopPx = LimitNowSellOrders[i].Price;
+                                }
+                                if (LimitNowSellOrders[i].OrdType == "Stop")
+                                {
+                                    LimitNowSellOrders[i].Price = null;
+                                    LimitNowSellOrders[i].StopPx = Price + ActiveInstrument.TickSize * LimitNowStopLossSellDelta;
+                                }
+                                if (LimitNowSellOrders[i].OrdType == "Limit")
+                                {
+                                    LimitNowSellOrders[i].Price = Price - ActiveInstrument.TickSize * LimitNowTakeProfitSellDelta;
+                                }
+                                if (LimitNowSellOrders[i].OrdType == "LimitIfTouched")
+                                {
+                                    LimitNowSellOrders[i].Price = Price - ActiveInstrument.TickSize * LimitNowTakeProfitSellDelta;
+                                    LimitNowSellOrders[i].StopPx = Price - ActiveInstrument.TickSize * LimitNowTakeProfitSellDelta;
+                                }
+                                if (LimitNowSellOrders[i].OrdType == "MarketIfTouched")
+                                {
+                                    LimitNowSellOrders[i].Price = null;
+                                    LimitNowSellOrders[i].StopPx = Price - ActiveInstrument.TickSize * LimitNowTakeProfitSellDelta;
+                                }
                             }
-                            if (LimitNowSellOrders[i].Side == "Buy" && LimitNowSellOrders[i].OrdType == "LimitIfTouched")
-                            {
-                                LimitNowSellOrders[i].Price = Price - ActiveInstrument.TickSize * LimitNowTakeProfitSellDelta;
-#if TRIGGERED_STOPS
-                                LimitNowSellOrders[i].StopPx = Price;
-#else
-                                LimitNowSellOrders[i].StopPx = LimitNowSellOrders[i].Price + ActiveInstrument.TickSize;
-#endif                     
-                            }
+
+                            /*
+                                                        if (LimitNowSellOrders[i].Side == "Buy" && LimitNowSellOrders[i].OrdType == "StopLimit")
+                                                        {
+                                                            LimitNowSellOrders[i].Price = Price + ActiveInstrument.TickSize * LimitNowStopLossSellDelta;
+                            #if TRIGGERED_STOPS
+                            #if PRICE_TRIGGER
+                                                            LimitNowSellOrders[i].StopPx = Price;
+                            #else
+                                                            LimitNowSellOrders[i].StopPx = Price + ActiveInstrument.TickSize;
+                            #endif
+                            #else
+                                                            LimitNowSellOrders[i].StopPx = LimitNowSellOrders[i].Price - ActiveInstrument.TickSize;
+                            #endif                       
+                                                        }
+                                                        if (LimitNowSellOrders[i].Side == "Buy" && LimitNowSellOrders[i].OrdType == "LimitIfTouched")
+                                                        {
+                                                            LimitNowSellOrders[i].Price = Price - ActiveInstrument.TickSize * LimitNowTakeProfitSellDelta;
+                            #if TRIGGERED_STOPS
+                            #if PRICE_TRIGGER
+                                                            LimitNowSellOrders[i].StopPx = Price;
+                            #else
+                                                            LimitNowSellOrders[i].StopPx = Price - ActiveInstrument.TickSize;
+                            #endif
+                            #else
+                                                            LimitNowSellOrders[i].StopPx = LimitNowSellOrders[i].Price + ActiveInstrument.TickSize;
+                            #endif                     
+                                                        }
+                            */
                         }
                         //LimitNowSellOrders[i].OrdStatus = "";
                         OrderAmend order = new OrderAmend(LimitNowSellOrders[i]);
@@ -3655,6 +3739,25 @@ namespace BitMEXAssistant
                     bitmex.CancelAllOpenOrders(ActiveInstrument.Symbol);
                     break;
             }
+        }
+
+        private void metroButton2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void chkLimitNowBuySLMarket_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.LimitNowBuySLMarket = chkLimitNowBuySLMarket.Checked;
+            SaveSettings();
+            LimitNowBuySLUseMarket = chkLimitNowBuySLMarket.Checked;
+        }
+
+        private void chkLimitNowSellSLMarket_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.LimitNowSellSLMarket = chkLimitNowSellSLMarket.Checked;
+            SaveSettings();
+            LimitNowSellSLUseMarket = chkLimitNowSellSLMarket.Checked;
         }
     }
 

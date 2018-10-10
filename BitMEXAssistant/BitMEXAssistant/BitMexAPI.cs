@@ -579,7 +579,7 @@ namespace BitMEX
             }
         }
 
-        public List<Order> LimitNowOrderSafety(string Symbol, string Side, int Quantity, decimal Price, decimal StopLossDelta, decimal TakeProfitDelta, decimal TickSize, bool ReduceOnly = false, bool PostOnly = false, bool Hidden = false)
+        public List<Order> LimitNowOrderSafety(string Symbol, string Side, int Quantity, decimal Price, decimal StopLossDelta, decimal TakeProfitDelta, decimal TickSize, bool UseMarketStopLoss, bool ReduceOnly = false, bool PostOnly = false, bool Hidden = false)
         {
 #if TRUE
             //Console.WriteLine("LimitNowOrderSafety");
@@ -615,6 +615,62 @@ namespace BitMEX
             orders.Add(limitOrder);
             //string order = JsonConvert.SerializeObject(limitOrder);
             // now we create the OTO order
+#if LIMITSTOPS
+            if (StopLossDelta != 0m)
+            {
+                Order StopLossOrder = new Order();
+                StopLossOrder.Symbol = Symbol;
+                StopLossOrder.Price = Price;
+                StopLossOrder.ContingencyType = "OneCancelsTheOther";
+                StopLossOrder.ContingencyType = "";
+                StopLossOrder.ExecInst += "ParticipateDoNotInitiate,Close,LastPrice";
+                StopLossOrder.ClOrdID = Guid.NewGuid().ToString();
+                StopLossOrder.ClOrdLinkID = limitOrder.ClOrdLinkID;
+
+                StopLossOrder.OrderQty = Quantity;
+                StopLossOrder.OrdType = "StopLimit";
+                if (Side == "Buy")
+                {
+                    StopLossOrder.Side = "Sell";
+                    StopLossOrder.Price = Price - StopLossDelta;
+                    StopLossOrder.StopPx = Price;
+                }
+                else
+                {
+                    StopLossOrder.Side = "Buy";
+                    StopLossOrder.Price = Price + StopLossDelta;
+                    StopLossOrder.StopPx = Price;
+                }
+                orders.Add(StopLossOrder);
+            }
+            if (TakeProfitDelta != 0m)
+            {
+                Order TakeProfitOrder = new Order();
+                TakeProfitOrder.Symbol = Symbol;
+                TakeProfitOrder.Price = Price;
+                TakeProfitOrder.ContingencyType = "OneCancelsTheOther";
+                TakeProfitOrder.ContingencyType = "";
+                TakeProfitOrder.ExecInst += "ParticipateDoNotInitiate";
+                TakeProfitOrder.ClOrdID = Guid.NewGuid().ToString();
+                TakeProfitOrder.ClOrdLinkID = limitOrder.ClOrdLinkID;
+
+                TakeProfitOrder.OrderQty = Quantity;
+                TakeProfitOrder.OrdType = "Limit";
+                if (Side == "Buy")
+                {
+                    TakeProfitOrder.Side = "Sell";
+                    TakeProfitOrder.Price = Price + TakeProfitDelta;
+                    //TakeProfitOrder.StopPx = Price;
+                }
+                else
+                {
+                    TakeProfitOrder.Side = "Buy";
+                    TakeProfitOrder.Price = Price - TakeProfitDelta;
+                    //TakeProfitOrder.StopPx = Price;
+                }
+                orders.Add(TakeProfitOrder);
+            }
+#else
             if (StopLossDelta != 0m)
             {
                 Order StopLossOrder = new Order();
@@ -622,45 +678,41 @@ namespace BitMEX
                 StopLossOrder.Price = Price;
                 StopLossOrder.ContingencyType = "OneCancelsTheOther";
                 //StopLossOrder.ContingencyType = "";
+                if (!UseMarketStopLoss)
+                    StopLossOrder.OrdType = "StopLimit"; // limit stoploss
+                else
+                    StopLossOrder.OrdType = "Stop"; // market stoploss
                 if (Side == "Buy")
                 {
                     StopLossOrder.Side = "Sell";
-                    StopLossOrder.Price = Price - StopLossDelta;
-#if TRIGGERED_STOPS
-                    StopLossOrder.StopPx = Price;
-#else
-                    StopLossOrder.StopPx = StopLossOrder.Price + TickSize;
-#endif
+                    if (StopLossOrder.OrdType == "StopLimit")
+                    {
+                        StopLossOrder.Price = Price - StopLossDelta;
+                        StopLossOrder.StopPx = StopLossOrder.Price;
+                    }
+                    else if (StopLossOrder.OrdType == "Stop")
+                    {
+                        StopLossOrder.Price = null;
+                        StopLossOrder.StopPx = Price - StopLossDelta;
+                    }
                 }
                 else
                 {
                     StopLossOrder.Side = "Buy";
-                    StopLossOrder.Price = Price + StopLossDelta;
-#if TRIGGERED_STOPS
-                    StopLossOrder.StopPx = Price;
-#else
-                    StopLossOrder.StopPx = StopLossOrder.Price - TickSize;
-#endif
+                    if (StopLossOrder.OrdType == "StopLimit")
+                    {
+                        StopLossOrder.Price = Price + StopLossDelta;
+                        StopLossOrder.StopPx = StopLossOrder.Price;
+                    }
+                    else if (StopLossOrder.OrdType == "Stop")
+                    {
+                        StopLossOrder.Price = null;
+                        StopLossOrder.StopPx = Price + StopLossDelta;
+                    }
                 }
                 StopLossOrder.OrderQty = Quantity;
-                StopLossOrder.OrdType = "StopLimit";
-                if (ReduceOnly && !PostOnly)
-                {
-                    StopLossOrder.ExecInst = "ReduceOnly";
-                }
-                else if (!ReduceOnly && PostOnly)
-                {
-                    StopLossOrder.ExecInst = "ParticipateDoNotInitiate";
-                }
-                else if (ReduceOnly && PostOnly)
-                {
-                    StopLossOrder.ExecInst = "ReduceOnly,ParticipateDoNotInitiate";
-                }
-                if (Hidden)
-                {
-                    StopLossOrder.ExecInst = "0";
-                }
-                StopLossOrder.ExecInst += ",LastPrice";
+                StopLossOrder.ExecInst = "LastPrice";
+                Console.WriteLine("StopLoss ExecInst:" + StopLossOrder.ExecInst);
                 StopLossOrder.ClOrdID = Guid.NewGuid().ToString();
                 StopLossOrder.ClOrdLinkID = limitOrder.ClOrdLinkID;
                 orders.Add(StopLossOrder);
@@ -672,53 +724,82 @@ namespace BitMEX
                 TakeProfitOrder.Price = Price;
                 TakeProfitOrder.ContingencyType = "OneCancelsTheOther";
                 //TakeProfitOrder.ContingencyType = "";
+                TakeProfitOrder.OrdType = "Limit";
+                //TakeProfitOrder.OrdType = "LimitIfTouched"; // ok
+                //TakeProfitOrder.OrdType = "MarketIfTouched"; // seems not good.. if its too close can result in a loss because it triggered and then the market when against
                 if (Side == "Buy")
                 {
                     TakeProfitOrder.Side = "Sell";
                     TakeProfitOrder.Price = Price + TakeProfitDelta;
+                    if (TakeProfitOrder.OrdType == "Limit")
+                    {
+                        TakeProfitOrder.Price = Price + TakeProfitDelta;
+                    }
+                    else if (TakeProfitOrder.OrdType == "LimitIfTouched")
+                    {
+                        TakeProfitOrder.Price = Price + TakeProfitDelta;
+                        TakeProfitOrder.StopPx = Price + TakeProfitDelta;
+                    }
+                    else if (TakeProfitOrder.OrdType == "MarketIfTouched")
+                    {
+                        TakeProfitOrder.Price = null;
+                        TakeProfitOrder.StopPx = Price + TakeProfitDelta;
+                    }
+/*
+                    if (TakeProfitOrder.OrdType.Contains("LimitIfTouched"))
 #if TRIGGERED_STOPS
-                    TakeProfitOrder.StopPx = Price;
+#if PRICE_TRIGGER
+                        TakeProfitOrder.StopPx = Price;
 #else
-                    TakeProfitOrder.StopPx = TakeProfitOrder.Price - TickSize;
+                        TakeProfitOrder.StopPx = Price + TickSize;
 #endif
+#else
+                        TakeProfitOrder.StopPx = TakeProfitOrder.Price - TickSize;
+#endif
+*/
                 }
                 else
                 {
                     TakeProfitOrder.Side = "Buy";
                     TakeProfitOrder.Price = Price - TakeProfitDelta;
-#if TRIGGERED_STOPS
-                    TakeProfitOrder.StopPx = Price;
-#else
-                    TakeProfitOrder.StopPx = TakeProfitOrder.Price + TickSize;
-#endif
+                    if (TakeProfitOrder.OrdType == "Limit")
+                    {
+                        TakeProfitOrder.Price = Price - TakeProfitDelta;
+                    }
+                    else if (TakeProfitOrder.OrdType == "LimitIfTouched")
+                    {
+                        TakeProfitOrder.Price = Price - TakeProfitDelta;
+                        TakeProfitOrder.StopPx = Price - TakeProfitDelta;
+                    }
+                    else if (TakeProfitOrder.OrdType == "MarketIfTouched")
+                    {
+                        TakeProfitOrder.Price = null;
+                        TakeProfitOrder.StopPx = Price - TakeProfitDelta;
+                    }
+                    /*
+                    #if TRIGGERED_STOPS
+                    #if PRICE_TRIGGER
+                                        TakeProfitOrder.StopPx = Price;
+                    #else
+                                        TakeProfitOrder.StopPx = Price - TickSize;
+                    #endif
+                    #else
+                                        TakeProfitOrder.StopPx = TakeProfitOrder.Price + TickSize;
+                    #endif
+                    */
                 }
                 TakeProfitOrder.OrderQty = Quantity;
-                TakeProfitOrder.OrdType = "LimitIfTouched";
-                if (ReduceOnly && !PostOnly)
-                {
-                    TakeProfitOrder.ExecInst = "ReduceOnly";
-                }
-                else if (!ReduceOnly && PostOnly)
-                {
-                    TakeProfitOrder.ExecInst = "ParticipateDoNotInitiate";
-                }
-                else if (ReduceOnly && PostOnly)
-                {
-                    TakeProfitOrder.ExecInst = "ReduceOnly,ParticipateDoNotInitiate";
-                }
-                if (Hidden)
-                {
-                    TakeProfitOrder.ExecInst = "0";
-                }
-                TakeProfitOrder.ExecInst += ",LastPrice";
+                if (TakeProfitOrder.OrdType=="LimitIfTouched" || TakeProfitOrder.OrdType == "MarketIfTouched")
+                    TakeProfitOrder.ExecInst = "LastPrice";
                 TakeProfitOrder.ClOrdID = Guid.NewGuid().ToString();
                 TakeProfitOrder.ClOrdLinkID = limitOrder.ClOrdLinkID;
                 orders.Add(TakeProfitOrder);
             }
-
+#endif
 
             string orderlist = JsonConvert.SerializeObject(orders);
             string res = BulkOrder(orderlist);
+            Console.WriteLine("Bulk Order return:"+res);
             try
             {
                 List<Order> Result = new List<Order>();
@@ -782,7 +863,7 @@ namespace BitMEX
                 return new List<Order>();
             }
 #endif
-                    return new List<Order>();
+            return new List<Order>();
         }
 
         public List<Order> LimitNowOrderBreakout(string Symbol, string Side, int Quantity, decimal Price, bool ReduceOnly = false, bool PostOnly = false, bool Hidden = false)

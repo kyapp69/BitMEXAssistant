@@ -937,6 +937,35 @@ namespace BitMEXAssistant.Properties {
             }
         }
 
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool LimitNowBuySLMarket
+        {
+            get
+            {
+                return ((bool)(this["LimitNowBuySLMarket"]));
+            }
+            set
+            {
+                this["LimitNowBuySLMarket"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool LimitNowSellSLMarket
+        {
+            get
+            {
+                return ((bool)(this["LimitNowSellSLMarket"]));
+            }
+            set
+            {
+                this["LimitNowSellSLMarket"] = value;
+            }
+        }
     }
 
 }
