@@ -255,6 +255,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TimedLock.cs" />
     <EmbeddedResource Include="APIInfo.resx">
       <DependentUpon>APIInfo.cs</DependentUpon>
     </EmbeddedResource>

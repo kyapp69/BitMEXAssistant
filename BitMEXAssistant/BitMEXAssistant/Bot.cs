@@ -72,6 +72,7 @@ namespace BitMEXAssistant
         decimal Balance = 0;
 
         #region L2
+        object L2Lock = new object();
         bool L2Initialized = false;
         SortedDictionary<long, OrderBook> OrderBookL2Asks = new SortedDictionary<long, OrderBook>(Comparer<long>.Create((x, y) => y.CompareTo(x)));
         SortedDictionary<long, OrderBook> OrderBookL2Bids = new SortedDictionary<long, OrderBook>();
@@ -435,165 +436,168 @@ namespace BitMEXAssistant
                         }
                         else if ((string)Message["table"] == "orderBookL2")
                         {
-                            /*
-                            Console.WriteLine("L2:"+e.Data);
-                            if (Message.ContainsKey("data"))
+                            using (TimedLock.Lock(L2Lock, new TimeSpan(0, 0, 0, 0, 100)))
                             {
-                                Console.WriteLine("OBL2 Data:"+ Message["data"]);
-                            }
-                            */
-                            try
-                            {
-                                if ((string)Message["action"] != "partial" && !L2Initialized)
+                                /*
+                                Console.WriteLine("L2:"+e.Data);
+                                if (Message.ContainsKey("data"))
                                 {
-                                    return;
+                                    Console.WriteLine("OBL2 Data:"+ Message["data"]);
                                 }
-                                if ((string)Message["action"] == "partial")
+                                */
+                                try
                                 {
-                                    Console.WriteLine("L2 Initializing/ReInitialize");
-                                    L2Initialized = true;
-                                    OrderBookL2Asks.Clear();
-                                    OrderBookL2Bids.Clear();
-                                    JArray TD = (JArray)Message["data"];
-                                    foreach (JObject i in TD)
+                                    if ((string)Message["action"] != "partial" && !L2Initialized)
                                     {
-                                        OrderBook OBI = new OrderBook();
-                                        OBI.Price = (decimal)i["price"];
-                                        OBI.Size = (int)i["size"];
-                                        long ID = (long)i["id"];
-                                        if ((string)i["side"] == "Sell")
-                                        {
-                                            OrderBookL2Asks.Add(ID, OBI);
-                                        }
-                                        else if ((string)i["side"] == "Buy")
-                                        {
-                                            OrderBookL2Bids.Add(ID, OBI);
-                                        }
+                                        return;
                                     }
-                                    long IDt = OrderBookL2Bids.ElementAt(0).Key;
-                                    decimal Price;
-                                    decimal l1 = (decimal)100000000 * (decimal)ActiveInstrumentIndex;
-                                    decimal l2 = l1 - (decimal)IDt;
-                                    decimal tickSize = ActiveInstrument.TickSize;
-                                    if (ActiveInstrument.Symbol == "XBTUSD")
+                                    if ((string)Message["action"] == "partial")
                                     {
-                                        tickSize = 0.01M;
-                                    }
-                                    Price = l2 * tickSize;
-                                    //Console.WriteLine("Top bids:"+Price);
-
-
-                                }
-                                else if ((string)Message["action"] == "delete")
-                                {
-                                    //Console.WriteLine("L2 delete");
-                                    JArray TD = (JArray)Message["data"];
-                                    foreach (JObject i in TD)
-                                    {
-                                        long ID = (long)i["id"];
-                                        if ((string)i["side"] == "Sell")
+                                        Console.WriteLine("L2 Initializing/ReInitialize");
+                                        L2Initialized = true;
+                                        OrderBookL2Asks.Clear();
+                                        OrderBookL2Bids.Clear();
+                                        JArray TD = (JArray)Message["data"];
+                                        foreach (JObject i in TD)
                                         {
-                                            if (OrderBookL2Asks.ContainsKey(ID))
+                                            OrderBook OBI = new OrderBook();
+                                            OBI.Price = (decimal)i["price"];
+                                            OBI.Size = (int)i["size"];
+                                            long ID = (long)i["id"];
+                                            if ((string)i["side"] == "Sell")
                                             {
-                                                OrderBookL2Asks.Remove(ID);
+                                                OrderBookL2Asks.Add(ID, OBI);
                                             }
-                                            else
+                                            else if ((string)i["side"] == "Buy")
                                             {
-                                                Console.WriteLine("(Delete)Unable to find record L2 Ask");
+                                                OrderBookL2Bids.Add(ID, OBI);
                                             }
                                         }
-                                        else if ((string)i["side"] == "Buy")
-                                        {
-                                            if (OrderBookL2Bids.ContainsKey(ID))
-                                            {
-                                                OrderBookL2Bids.Remove(ID);
-                                            }
-                                            else
-                                            {
-                                                Console.WriteLine("(Delete)Unable to find record L2 Bids");
-                                            }
-                                        }
-                                    }
-                                }
-                                else if ((string)Message["action"] == "update")
-                                {
-                                    //Console.WriteLine("L2 update");
-                                    JArray TD = (JArray)Message["data"];
-                                    foreach (JObject i in TD)
-                                    {
-                                        long ID = (long)i["id"];
+                                        long IDt = OrderBookL2Bids.ElementAt(0).Key;
                                         decimal Price;
                                         decimal l1 = (decimal)100000000 * (decimal)ActiveInstrumentIndex;
-                                        decimal l2 = l1 - (decimal)ID;
+                                        decimal l2 = l1 - (decimal)IDt;
                                         decimal tickSize = ActiveInstrument.TickSize;
                                         if (ActiveInstrument.Symbol == "XBTUSD")
                                         {
                                             tickSize = 0.01M;
                                         }
                                         Price = l2 * tickSize;
-                                        //Console.WriteLine("Updating "+ (string)i["side"] + " Price Level:" + Price +"("+ (int)i["size"] +")");
-                                        if ((string)i["side"] == "Sell")
-                                        {
-                                            if (OrderBookL2Asks.ContainsKey(ID))
-                                            {
-                                                OrderBookL2Asks[ID].Size = (int)i["size"];
-                                            }
-                                            else
-                                            {
-                                                Console.WriteLine("(Update)Unable to find record L2 Ask");
-                                            }
-                                        }
-                                        else if ((string)i["side"] == "Buy")
-                                        {
-                                            if (OrderBookL2Bids.ContainsKey(ID))
-                                            {
-                                                OrderBookL2Bids[ID].Size = (int)i["size"];
-                                            }
-                                            else
-                                            {
-                                                Console.WriteLine("(Update)Unable to find record L2 Bids");
-                                            }
-                                        }
+                                        //Console.WriteLine("Top bids:"+Price);
+
+
                                     }
-                                }
-                                else if ((string)Message["action"] == "insert")
-                                {
-                                    //Console.WriteLine("L2 insert");
-                                    JArray TD = (JArray)Message["data"];
-                                    foreach (JObject i in TD)
+                                    else if ((string)Message["action"] == "delete")
                                     {
-                                        OrderBook OBI = new OrderBook();
-                                        OBI.Price = (decimal)i["price"];
-                                        OBI.Size = (int)i["size"];
-                                        long ID = (long)i["id"];
-                                        if ((string)i["side"] == "Sell")
+                                        //Console.WriteLine("L2 delete");
+                                        JArray TD = (JArray)Message["data"];
+                                        foreach (JObject i in TD)
                                         {
-                                            if (OrderBookL2Asks.ContainsKey(ID))
+                                            long ID = (long)i["id"];
+                                            if ((string)i["side"] == "Sell")
                                             {
-                                                Console.WriteLine("(Insert)L2 Asks already contains key");
+                                                if (OrderBookL2Asks.ContainsKey(ID))
+                                                {
+                                                    OrderBookL2Asks.Remove(ID);
+                                                }
+                                                else
+                                                {
+                                                    Console.WriteLine("(Delete)Unable to find record L2 Ask");
+                                                }
                                             }
-                                            else
+                                            else if ((string)i["side"] == "Buy")
                                             {
-                                                OrderBookL2Asks.Add(ID, OBI);
+                                                if (OrderBookL2Bids.ContainsKey(ID))
+                                                {
+                                                    OrderBookL2Bids.Remove(ID);
+                                                }
+                                                else
+                                                {
+                                                    Console.WriteLine("(Delete)Unable to find record L2 Bids");
+                                                }
                                             }
                                         }
-                                        else if ((string)i["side"] == "Buy")
+                                    }
+                                    else if ((string)Message["action"] == "update")
+                                    {
+                                        //Console.WriteLine("L2 update");
+                                        JArray TD = (JArray)Message["data"];
+                                        foreach (JObject i in TD)
                                         {
-                                            if (OrderBookL2Bids.ContainsKey(ID))
+                                            long ID = (long)i["id"];
+                                            decimal Price;
+                                            decimal l1 = (decimal)100000000 * (decimal)ActiveInstrumentIndex;
+                                            decimal l2 = l1 - (decimal)ID;
+                                            decimal tickSize = ActiveInstrument.TickSize;
+                                            if (ActiveInstrument.Symbol == "XBTUSD")
                                             {
-                                                Console.WriteLine("(Insert)L2 Bids already contains key");
+                                                tickSize = 0.01M;
                                             }
-                                            else
+                                            Price = l2 * tickSize;
+                                            //Console.WriteLine("Updating "+ (string)i["side"] + " Price Level:" + Price +"("+ (int)i["size"] +")");
+                                            if ((string)i["side"] == "Sell")
                                             {
-                                                OrderBookL2Bids.Add(ID, OBI);
+                                                if (OrderBookL2Asks.ContainsKey(ID))
+                                                {
+                                                    OrderBookL2Asks[ID].Size = (int)i["size"];
+                                                }
+                                                else
+                                                {
+                                                    Console.WriteLine("(Update)Unable to find record L2 Ask");
+                                                }
+                                            }
+                                            else if ((string)i["side"] == "Buy")
+                                            {
+                                                if (OrderBookL2Bids.ContainsKey(ID))
+                                                {
+                                                    OrderBookL2Bids[ID].Size = (int)i["size"];
+                                                }
+                                                else
+                                                {
+                                                    Console.WriteLine("(Update)Unable to find record L2 Bids");
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else if ((string)Message["action"] == "insert")
+                                    {
+                                        //Console.WriteLine("L2 insert");
+                                        JArray TD = (JArray)Message["data"];
+                                        foreach (JObject i in TD)
+                                        {
+                                            OrderBook OBI = new OrderBook();
+                                            OBI.Price = (decimal)i["price"];
+                                            OBI.Size = (int)i["size"];
+                                            long ID = (long)i["id"];
+                                            if ((string)i["side"] == "Sell")
+                                            {
+                                                if (OrderBookL2Asks.ContainsKey(ID))
+                                                {
+                                                    Console.WriteLine("(Insert)L2 Asks already contains key");
+                                                }
+                                                else
+                                                {
+                                                    OrderBookL2Asks.Add(ID, OBI);
+                                                }
+                                            }
+                                            else if ((string)i["side"] == "Buy")
+                                            {
+                                                if (OrderBookL2Bids.ContainsKey(ID))
+                                                {
+                                                    Console.WriteLine("(Insert)L2 Bids already contains key");
+                                                }
+                                                else
+                                                {
+                                                    OrderBookL2Bids.Add(ID, OBI);
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
-                            catch (Exception l2)
-                            {
-                                Console.WriteLine("L2 exception");
+                                catch (Exception l2)
+                                {
+                                    Console.WriteLine("L2 exception");
+                                }
                             }
                             //Console.WriteLine("L2: Action:" + Message["action"]);
                             if (OnOrderUpdate != null)
@@ -3127,121 +3131,125 @@ namespace BitMEXAssistant
         private decimal LimitNowGetOrderPrice(string Side,bool UseL2 = true)
         {
             decimal Price = Decimal.Zero;
-            try
+            using (TimedLock.Lock(L2Lock, new TimeSpan(0, 0, 0, 0, 100)))
             {
-                switch (Side)
+                try
                 {
-                    case "Buy":
-                        if (LimitNowBuyMethod == "Best Price")
-                        {
-                            decimal LowestAsk = decimal.Zero;
-                            decimal HighestBid = decimal.Zero;
+                    switch (Side)
+                    {
+                        case "Buy":
+                            if (LimitNowBuyMethod == "Best Price")
+                            {
+                                decimal LowestAsk = decimal.Zero;
+                                decimal HighestBid = decimal.Zero;
 #if !USE_L2
                             LowestAsk = OrderBookTopAsks.OrderBy(a => a.Price).FirstOrDefault().Price;
                             HighestBid = OrderBookTopBids.OrderByDescending(a => a.Price).FirstOrDefault().Price;
 #else
-                            LowestAsk = OrderBookL2Asks.ElementAt(0).Value.Price;
-                            HighestBid = OrderBookL2Bids.ElementAt(0).Value.Price;
+                                LowestAsk = OrderBookL2Asks.ElementAt(0).Value.Price;
+                                HighestBid = OrderBookL2Bids.ElementAt(0).Value.Price;
 #endif
-                            if (HighestBid != LimitNowBuyOrderPrice) // Our price isn't the highest in book
-                            {
-                                if (LowestAsk - HighestBid > ActiveInstrument.TickSize) // More than 1 tick size spread
+                                if (HighestBid != LimitNowBuyOrderPrice) // Our price isn't the highest in book
                                 {
-                                    Price = HighestBid + ActiveInstrument.TickSize;
+                                    if (LowestAsk - HighestBid > ActiveInstrument.TickSize) // More than 1 tick size spread
+                                    {
+                                        Price = HighestBid + ActiveInstrument.TickSize;
+                                    }
+                                    else
+                                    {
+                                        Price = LowestAsk - ActiveInstrument.TickSize;
+                                    }
                                 }
                                 else
                                 {
-                                    Price = LowestAsk - ActiveInstrument.TickSize;
+                                    //Log("Buy Best Price Unable to set Price:Highest bid is the same as asking:" + HighestBid + ":" + LimitNowBuyOrderPrice);
                                 }
-                            }
-                            else
-                            {
-                                //Log("Buy Best Price Unable to set Price:Highest bid is the same as asking:" + HighestBid + ":" + LimitNowBuyOrderPrice);
-                            }
 
-                        }
-                        else if (LimitNowBuyMethod == "Quick Fill")
-                        {
+                            }
+                            else if (LimitNowBuyMethod == "Quick Fill")
+                            {
 #if !USE_L2
                             Price = OrderBookTopAsks.OrderBy(a => a.Price).FirstOrDefault().Price - (ActiveInstrument.TickSize * LimitNowBuyTicksFromCenter);
 #else
-                            Price = OrderBookL2Asks.ElementAt(0).Value.Price - (ActiveInstrument.TickSize * LimitNowBuyTicksFromCenter);
+                                Price = OrderBookL2Asks.ElementAt(0).Value.Price - (ActiveInstrument.TickSize * LimitNowBuyTicksFromCenter);
 #endif
-                        }
-                        else if (LimitNowBuyMethod == "Order Level")
-                        {
-                            if (!UseL2)
+                            }
+                            else if (LimitNowBuyMethod == "Order Level")
                             {
-                                List<OrderBook> sorted = OrderBookTopBids.OrderByDescending(a => a.Price).ToList();
-                                if (LimitNowBuyLevel<sorted.Count)
+                                if (!UseL2)
                                 {
-                                    Price = sorted[LimitNowBuyLevel].Price;
+                                    List<OrderBook> sorted = OrderBookTopBids.OrderByDescending(a => a.Price).ToList();
+                                    if (LimitNowBuyLevel < sorted.Count)
+                                    {
+                                        Price = sorted[LimitNowBuyLevel].Price;
+                                    }
+                                }
+                                else if (L2Initialized)
+                                {
+                                    Price = OrderBookL2Bids.ElementAt(LimitNowBuyLevel).Value.Price;
                                 }
                             }
-                            else if (L2Initialized)
+                            break;
+                        case "Sell":
+                            if (LimitNowSellMethod == "Best Price")
                             {
-                                Price = OrderBookL2Bids.ElementAt(LimitNowBuyLevel).Value.Price;
-                            }
-                        }
-                        break;
-                    case "Sell":
-                        if (LimitNowSellMethod == "Best Price")
-                        {
-                            decimal LowestAsk = decimal.Zero;
-                            decimal HighestBid = decimal.Zero;
+                                decimal LowestAsk = decimal.Zero;
+                                decimal HighestBid = decimal.Zero;
 #if !USE_L2
                             LowestAsk = OrderBookTopAsks.OrderBy(a => a.Price).FirstOrDefault().Price;
                             HighestBid = OrderBookTopBids.OrderByDescending(a => a.Price).FirstOrDefault().Price;
 #else
-                            LowestAsk = OrderBookL2Asks.ElementAt(0).Value.Price;
-                            HighestBid = OrderBookL2Bids.ElementAt(0).Value.Price;
+                                LowestAsk = OrderBookL2Asks.ElementAt(0).Value.Price;
+                                HighestBid = OrderBookL2Bids.ElementAt(0).Value.Price;
 #endif
-                            if (LowestAsk != LimitNowSellOrderPrice) // Our price isn't the highest in book
-                            {
-                                if (LowestAsk - HighestBid > ActiveInstrument.TickSize) // More than 1 tick size spread
+                                if (LowestAsk != LimitNowSellOrderPrice) // Our price isn't the highest in book
                                 {
-                                    Price = LowestAsk - ActiveInstrument.TickSize;
+                                    if (LowestAsk - HighestBid > ActiveInstrument.TickSize) // More than 1 tick size spread
+                                    {
+                                        Price = LowestAsk - ActiveInstrument.TickSize;
+                                    }
+                                    else
+                                    {
+                                        Price = HighestBid + ActiveInstrument.TickSize;
+                                    }
                                 }
                                 else
                                 {
-                                    Price = HighestBid + ActiveInstrument.TickSize;
+                                    //Log("Sell Best Price Unable to set Price:Lowest ask is the same as asking:" + LowestAsk + ":" + LimitNowSellOrderPrice);
                                 }
                             }
-                            else
+                            else if (LimitNowSellMethod == "Quick Fill")
                             {
-                                //Log("Sell Best Price Unable to set Price:Lowest ask is the same as asking:" + LowestAsk + ":" + LimitNowSellOrderPrice);
-                            }
-                        }
-                        else if (LimitNowSellMethod == "Quick Fill")
-                        {
 #if !USE_L2
                             Price = OrderBookTopBids.OrderByDescending(a => a.Price).FirstOrDefault().Price + (ActiveInstrument.TickSize * LimitNowSellTicksFromCenter);
 #else
-                            Price = OrderBookL2Bids.ElementAt(0).Value.Price + (ActiveInstrument.TickSize * LimitNowSellTicksFromCenter);
+                                Price = OrderBookL2Bids.ElementAt(0).Value.Price + (ActiveInstrument.TickSize * LimitNowSellTicksFromCenter);
 #endif
-                        }
-                        else if (LimitNowSellMethod == "Order Level")
-                        {
-                            if (!UseL2)
+                            }
+                            else if (LimitNowSellMethod == "Order Level")
                             {
-                                List<OrderBook> sorted = OrderBookTopAsks.OrderBy(a => a.Price).ToList();
-                                if (LimitNowSellLevel<sorted.Count)
+                                if (!UseL2)
                                 {
-                                    Price = sorted[LimitNowSellLevel].Price;
+                                    List<OrderBook> sorted = OrderBookTopAsks.OrderBy(a => a.Price).ToList();
+                                    if (LimitNowSellLevel < sorted.Count)
+                                    {
+                                        Price = sorted[LimitNowSellLevel].Price;
+                                    }
+                                }
+                                else if (L2Initialized)
+                                {
+                                    Price = OrderBookL2Asks.ElementAt(LimitNowSellLevel).Value.Price;
                                 }
                             }
-                            else if (L2Initialized)
-                            {
-                                Price = OrderBookL2Asks.ElementAt(LimitNowSellLevel).Value.Price;
-                            }
-                        }
-                        break;
-                    default:
-                        break;
+                            break;
+                        default:
+                            break;
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
+                catch (Exception ex)
+                {
+
+                }
 
             }
 
