@@ -12,7 +12,7 @@ namespace BitMEXAssistant.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.7.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.8.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -742,230 +742,185 @@ namespace BitMEXAssistant.Properties {
                 this["XBTUSDReferencePrice"] = value;
             }
         }
-
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LimitNowOrderBookSell {
+            get {
+                return ((bool)(this["LimitNowOrderBookSell"]));
+            }
+            set {
+                this["LimitNowOrderBookSell"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LimitNowOrderBookBuy {
+            get {
+                return ((bool)(this["LimitNowOrderBookBuy"]));
+            }
+            set {
+                this["LimitNowOrderBookBuy"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool LimitNowStopLossSell {
+            get {
+                return ((bool)(this["LimitNowStopLossSell"]));
+            }
+            set {
+                this["LimitNowStopLossSell"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public decimal LimitNowStopLossBuyDelta {
+            get {
+                return ((decimal)(this["LimitNowStopLossBuyDelta"]));
+            }
+            set {
+                this["LimitNowStopLossBuyDelta"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public decimal LimitNowStopLossSellDelta {
+            get {
+                return ((decimal)(this["LimitNowStopLossSellDelta"]));
+            }
+            set {
+                this["LimitNowStopLossSellDelta"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int LimitNowSellLevel {
+            get {
+                return ((int)(this["LimitNowSellLevel"]));
+            }
+            set {
+                this["LimitNowSellLevel"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int LimitNowBuyLevel {
+            get {
+                return ((int)(this["LimitNowBuyLevel"]));
+            }
+            set {
+                this["LimitNowBuyLevel"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int TabSelection {
+            get {
+                return ((int)(this["TabSelection"]));
+            }
+            set {
+                this["TabSelection"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool LimitNowTakeProfitBuy {
+            get {
+                return ((bool)(this["LimitNowTakeProfitBuy"]));
+            }
+            set {
+                this["LimitNowTakeProfitBuy"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool LimitNowTakeProfitSell {
+            get {
+                return ((bool)(this["LimitNowTakeProfitSell"]));
+            }
+            set {
+                this["LimitNowTakeProfitSell"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public decimal LimitNowTakeProfitSellDelta {
+            get {
+                return ((decimal)(this["LimitNowTakeProfitSellDelta"]));
+            }
+            set {
+                this["LimitNowTakeProfitSellDelta"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public decimal LimitNowTakeProfitBuyDelta {
+            get {
+                return ((decimal)(this["LimitNowTakeProfitBuyDelta"]));
+            }
+            set {
+                this["LimitNowTakeProfitBuyDelta"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool LimitNowBuySLMarket {
+            get {
+                return ((bool)(this["LimitNowBuySLMarket"]));
+            }
+            set {
+                this["LimitNowBuySLMarket"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool LimitNowSellSLMarket {
+            get {
+                return ((bool)(this["LimitNowSellSLMarket"]));
+            }
+            set {
+                this["LimitNowSellSLMarket"] = value;
+            }
+        }
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool LimitNowStopLossBuy {
-            get
-            {
+            get {
                 return ((bool)(this["LimitNowStopLossBuy"]));
             }
-            set
-            {
+            set {
                 this["LimitNowStopLossBuy"] = value;
             }
         }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("false")]
-        public bool LimitNowOrderBookSell
-        {
-            get
-            {
-                return ((bool)(this["LimitNowOrderBookSell"]));
-            }
-            set
-            {
-                this["LimitNowOrderBookSell"] = value;
-            }
-        }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("false")]
-        public bool LimitNowOrderBookBuy
-        {
-            get
-            {
-                return ((bool)(this["LimitNowOrderBookBuy"]));
-            }
-            set
-            {
-                this["LimitNowOrderBookBuy"] = value;
-            }
-        }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool LimitNowStopLossSell
-        {
-            get
-            {
-                return ((bool)(this["LimitNowStopLossSell"]));
-            }
-            set
-            {
-                this["LimitNowStopLossSell"] = value;
-            }
-        }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal LimitNowStopLossBuyDelta
-        {
-            get
-            {
-                return ((decimal)(this["LimitNowStopLossBuyDelta"]));
-            }
-            set
-            {
-                this["LimitNowStopLossBuyDelta"] = value;
-            }
-        }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal LimitNowStopLossSellDelta
-        {
-            get
-            {
-                return ((decimal)(this["LimitNowStopLossSellDelta"]));
-            }
-            set
-            {
-                this["LimitNowStopLossSellDelta"] = value;
-            }
-        }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int LimitNowSellLevel
-        {
-            get
-            {
-                return ((int)(this["LimitNowSellLevel"]));
-            }
-            set
-            {
-                this["LimitNowSellLevel"] = value;
-            }
-        }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int LimitNowBuyLevel
-        {
-            get
-            {
-                return ((int)(this["LimitNowBuyLevel"]));
-            }
-            set
-            {
-                this["LimitNowBuyLevel"] = value;
-            }
-        }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int TabSelection
-        {
-            get
-            {
-                return ((int)(this["TabSelection"]));
-            }
-            set
-            {
-                this["TabSelection"] = value;
-            }
-        }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool LimitNowTakeProfitBuy
-        {
-            get
-            {
-                return ((bool)(this["LimitNowTakeProfitBuy"]));
-            }
-            set
-            {
-                this["LimitNowTakeProfitBuy"] = value;
-            }
-        }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool LimitNowTakeProfitSell
-        {
-            get
-            {
-                return ((bool)(this["LimitNowTakeProfitSell"]));
-            }
-            set
-            {
-                this["LimitNowTakeProfitSell"] = value;
-            }
-        }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal LimitNowTakeProfitSellDelta
-        {
-            get
-            {
-                return ((decimal)(this["LimitNowTakeProfitSellDelta"]));
-            }
-            set
-            {
-                this["LimitNowTakeProfitSellDelta"] = value;
-            }
-        }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public decimal LimitNowTakeProfitBuyDelta
-        {
-            get
-            {
-                return ((decimal)(this["LimitNowTakeProfitBuyDelta"]));
-            }
-            set
-            {
-                this["LimitNowTakeProfitBuyDelta"] = value;
-            }
-        }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool LimitNowBuySLMarket
-        {
-            get
-            {
-                return ((bool)(this["LimitNowBuySLMarket"]));
-            }
-            set
-            {
-                this["LimitNowBuySLMarket"] = value;
-            }
-        }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool LimitNowSellSLMarket
-        {
-            get
-            {
-                return ((bool)(this["LimitNowSellSLMarket"]));
-            }
-            set
-            {
-                this["LimitNowSellSLMarket"] = value;
-            }
-        }
     }
-
 }
