@@ -74,6 +74,7 @@
             this.label31 = new System.Windows.Forms.Label();
             this.label30 = new System.Windows.Forms.Label();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.chkLimitNowSellSLMarket = new MetroFramework.Controls.MetroCheckBox();
             this.metroLabel17 = new MetroFramework.Controls.MetroLabel();
             this.nudLimitNowTakeProfitSellDelta = new System.Windows.Forms.NumericUpDown();
             this.chkLimitNowTakeProfitSell = new MetroFramework.Controls.MetroCheckBox();
@@ -97,6 +98,7 @@
             this.btnLimitNowSell = new MetroFramework.Controls.MetroButton();
             this.btnLimitNowSellCancel = new MetroFramework.Controls.MetroButton();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.chkLimitNowBuySLMarket = new MetroFramework.Controls.MetroCheckBox();
             this.metroLabel18 = new MetroFramework.Controls.MetroLabel();
             this.nudLimitNowTakeProfitBuyDelta = new System.Windows.Forms.NumericUpDown();
             this.chkLimitNowTakeProfitBuy = new MetroFramework.Controls.MetroCheckBox();
@@ -186,7 +188,6 @@
             this.label7 = new MetroFramework.Controls.MetroLabel();
             this.chkSettingOverloadRetry = new MetroFramework.Controls.MetroCheckBox();
             this.nudSettingsOverloadRetryAttempts = new System.Windows.Forms.NumericUpDown();
-            this.tabBreakout = new System.Windows.Forms.TabPage();
             this.tabDonate = new MetroFramework.Controls.MetroTabPage();
             this.metroLabel16 = new MetroFramework.Controls.MetroLabel();
             this.metroLabel15 = new MetroFramework.Controls.MetroLabel();
@@ -194,9 +195,7 @@
             this.metroLabel13 = new MetroFramework.Controls.MetroLabel();
             this.pictureBox5 = new System.Windows.Forms.PictureBox();
             this.pictureBox4 = new System.Windows.Forms.PictureBox();
-            this.lblDonateAddress = new MetroFramework.Controls.MetroLabel();
-            this.label16 = new MetroFramework.Controls.MetroLabel();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.tabBreakout = new System.Windows.Forms.TabPage();
             this.tabVideos = new System.Windows.Forms.TabPage();
             this.tabDebug = new System.Windows.Forms.TabPage();
             this.metroButton2 = new MetroFramework.Controls.MetroButton();
@@ -246,8 +245,6 @@
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.pbxYouTubeSubscribe = new System.Windows.Forms.PictureBox();
             this.metroButton1 = new MetroFramework.Controls.MetroButton();
-            this.chkLimitNowBuySLMarket = new MetroFramework.Controls.MetroCheckBox();
-            this.chkLimitNowSellSLMarket = new MetroFramework.Controls.MetroCheckBox();
             this.TabControl.SuspendLayout();
             this.tabManual.SuspendLayout();
             this.groupBox5.SuspendLayout();
@@ -302,7 +299,6 @@
             this.tabDonate.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabDebug.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudPositionLimitPrice)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudPositionMargin)).BeginInit();
@@ -381,7 +377,7 @@
             this.TabControl.Controls.Add(this.tabDebug);
             this.TabControl.Location = new System.Drawing.Point(0, 125);
             this.TabControl.Name = "TabControl";
-            this.TabControl.SelectedIndex = 1;
+            this.TabControl.SelectedIndex = 6;
             this.TabControl.Size = new System.Drawing.Size(857, 394);
             this.TabControl.Style = MetroFramework.MetroColorStyle.White;
             this.TabControl.TabIndex = 14;
@@ -986,6 +982,17 @@
             this.groupBox8.TabStop = false;
             this.groupBox8.Text = "Sell";
             // 
+            // chkLimitNowSellSLMarket
+            // 
+            this.chkLimitNowSellSLMarket.AutoSize = true;
+            this.chkLimitNowSellSLMarket.Location = new System.Drawing.Point(220, 177);
+            this.chkLimitNowSellSLMarket.Name = "chkLimitNowSellSLMarket";
+            this.chkLimitNowSellSLMarket.Size = new System.Drawing.Size(63, 15);
+            this.chkLimitNowSellSLMarket.TabIndex = 44;
+            this.chkLimitNowSellSLMarket.Text = "UseMkt";
+            this.chkLimitNowSellSLMarket.UseSelectable = true;
+            this.chkLimitNowSellSLMarket.CheckedChanged += new System.EventHandler(this.chkLimitNowSellSLMarket_CheckedChanged);
+            // 
             // metroLabel17
             // 
             this.metroLabel17.AutoSize = true;
@@ -1303,6 +1310,17 @@
             this.groupBox7.TabIndex = 31;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Buy";
+            // 
+            // chkLimitNowBuySLMarket
+            // 
+            this.chkLimitNowBuySLMarket.AutoSize = true;
+            this.chkLimitNowBuySLMarket.Location = new System.Drawing.Point(220, 177);
+            this.chkLimitNowBuySLMarket.Name = "chkLimitNowBuySLMarket";
+            this.chkLimitNowBuySLMarket.Size = new System.Drawing.Size(63, 15);
+            this.chkLimitNowBuySLMarket.TabIndex = 43;
+            this.chkLimitNowBuySLMarket.Text = "UseMkt";
+            this.chkLimitNowBuySLMarket.UseSelectable = true;
+            this.chkLimitNowBuySLMarket.CheckedChanged += new System.EventHandler(this.chkLimitNowBuySLMarket_CheckedChanged);
             // 
             // metroLabel18
             // 
@@ -2536,15 +2554,6 @@
             0});
             this.nudSettingsOverloadRetryAttempts.ValueChanged += new System.EventHandler(this.nudSettingsOverloadRetryAttempts_ValueChanged);
             // 
-            // tabBreakout
-            // 
-            this.tabBreakout.BackColor = System.Drawing.Color.Transparent;
-            this.tabBreakout.Location = new System.Drawing.Point(4, 38);
-            this.tabBreakout.Name = "tabBreakout";
-            this.tabBreakout.Size = new System.Drawing.Size(849, 352);
-            this.tabBreakout.TabIndex = 8;
-            this.tabBreakout.Text = "Breakout";
-            // 
             // tabDonate
             // 
             this.tabDonate.Controls.Add(this.metroLabel16);
@@ -2553,9 +2562,6 @@
             this.tabDonate.Controls.Add(this.metroLabel13);
             this.tabDonate.Controls.Add(this.pictureBox5);
             this.tabDonate.Controls.Add(this.pictureBox4);
-            this.tabDonate.Controls.Add(this.lblDonateAddress);
-            this.tabDonate.Controls.Add(this.label16);
-            this.tabDonate.Controls.Add(this.pictureBox1);
             this.tabDonate.HorizontalScrollbarBarColor = true;
             this.tabDonate.HorizontalScrollbarHighlightOnWheel = false;
             this.tabDonate.HorizontalScrollbarSize = 10;
@@ -2627,37 +2633,14 @@
             this.pictureBox4.TabIndex = 3;
             this.pictureBox4.TabStop = false;
             // 
-            // lblDonateAddress
+            // tabBreakout
             // 
-            this.lblDonateAddress.AutoSize = true;
-            this.lblDonateAddress.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.lblDonateAddress.FontWeight = MetroFramework.MetroLabelWeight.Bold;
-            this.lblDonateAddress.Location = new System.Drawing.Point(170, 33);
-            this.lblDonateAddress.Name = "lblDonateAddress";
-            this.lblDonateAddress.Size = new System.Drawing.Size(327, 19);
-            this.lblDonateAddress.TabIndex = 2;
-            this.lblDonateAddress.Text = "BTC: 33biFCDFEZn3hLJcGKLR5Muu9oeRWBAFEX";
-            this.MetroToolTip.SetToolTip(this.lblDonateAddress, "Click to Copy");
-            this.lblDonateAddress.Click += new System.EventHandler(this.lblDonateAddress_Click);
-            // 
-            // label16
-            // 
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(170, 13);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(376, 19);
-            this.label16.TabIndex = 1;
-            this.label16.Text = "Any BTC donations are appreciated for supporting this project.";
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(14, 13);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(150, 150);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
+            this.tabBreakout.BackColor = System.Drawing.Color.Transparent;
+            this.tabBreakout.Location = new System.Drawing.Point(4, 38);
+            this.tabBreakout.Name = "tabBreakout";
+            this.tabBreakout.Size = new System.Drawing.Size(849, 352);
+            this.tabBreakout.TabIndex = 8;
+            this.tabBreakout.Text = "Breakout";
             // 
             // tabVideos
             // 
@@ -3599,28 +3582,6 @@
             this.metroButton1.UseSelectable = true;
             this.metroButton1.Click += new System.EventHandler(this.metroButton1_Click);
             // 
-            // chkLimitNowBuySLMarket
-            // 
-            this.chkLimitNowBuySLMarket.AutoSize = true;
-            this.chkLimitNowBuySLMarket.Location = new System.Drawing.Point(220, 177);
-            this.chkLimitNowBuySLMarket.Name = "chkLimitNowBuySLMarket";
-            this.chkLimitNowBuySLMarket.Size = new System.Drawing.Size(63, 15);
-            this.chkLimitNowBuySLMarket.TabIndex = 43;
-            this.chkLimitNowBuySLMarket.Text = "UseMkt";
-            this.chkLimitNowBuySLMarket.UseSelectable = true;
-            this.chkLimitNowBuySLMarket.CheckedChanged += new System.EventHandler(this.chkLimitNowBuySLMarket_CheckedChanged);
-            // 
-            // chkLimitNowSellSLMarket
-            // 
-            this.chkLimitNowSellSLMarket.AutoSize = true;
-            this.chkLimitNowSellSLMarket.Location = new System.Drawing.Point(220, 177);
-            this.chkLimitNowSellSLMarket.Name = "chkLimitNowSellSLMarket";
-            this.chkLimitNowSellSLMarket.Size = new System.Drawing.Size(63, 15);
-            this.chkLimitNowSellSLMarket.TabIndex = 44;
-            this.chkLimitNowSellSLMarket.Text = "UseMkt";
-            this.chkLimitNowSellSLMarket.UseSelectable = true;
-            this.chkLimitNowSellSLMarket.CheckedChanged += new System.EventHandler(this.chkLimitNowSellSLMarket_CheckedChanged);
-            // 
             // Bot
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -3728,7 +3689,6 @@
             this.tabDonate.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.tabDebug.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.nudPositionLimitPrice)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudPositionMargin)).EndInit();
@@ -3824,9 +3784,6 @@
         private System.Windows.Forms.Timer tmrClientUpdates;
         private System.Windows.Forms.NumericUpDown nudCurrentPrice;
         private MetroFramework.Controls.MetroTabPage tabDonate;
-        private MetroFramework.Controls.MetroLabel lblDonateAddress;
-        private MetroFramework.Controls.MetroLabel label16;
-        private System.Windows.Forms.PictureBox pictureBox1;
         private MetroFramework.Controls.MetroLabel lblDonate;
         private MetroFramework.Controls.MetroTabPage tabManual;
         private System.Windows.Forms.GroupBox groupBox4;

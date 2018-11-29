@@ -124,7 +124,8 @@
     <value>True</value>
   </metadata>
   <data name="label30.Text" xml:space="preserve">
-    <value>Limit Now orders can execute very quickly.  Please be very mindful that BitMEX rate limits API calls, so setting your delay to a small value is a sure fire way to get flagged by BitMEX.  This means you must be careful that you don't make too many requests, which can result in a suspended BitMEX account.  This is a very advanced feature.</value>
+    <value>Limit Now orders can execute very quickly.  Please be very mindful that BitMEX rate limits API calls, so setting your delay to a small value is a sure fire way to get flagged by BitMEX.  This means you must be careful that you don't make too many requests, which can result in a suspended BitMEX account.  This is a very advanced feature.
+All Orders are post-only</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="pictureBox5.InitialImage" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
@@ -247,23 +248,11 @@
         +PjDfH8APj7+MN8fgI+PP8z3B+Dj4w/z/QH4+Piz/O9//wdKX/azYGtO/AAAAABJRU5ErkJggg==
 </value>
   </data>
-  <metadata name="MetroToolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>920, 15</value>
-  </metadata>
-  <data name="pictureBox1.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAAMgAAADIAQMAAACXljzdAAAABGdBTUEAALGPC/xhBQAAAAZQTFRFAAAA
-        ////pdmf3QAAAAlwSFlzAAAOvwAADr8BOAVTJAAAAV1JREFUWMPtlzEOwyAMRcnEMXzTEG7KMZji2v/T
-        VqrUpQt/qBVFgcfgYOxvin+zP/mVzBJ2+GiztGl39SsnTINYuNhjLsZ1HNN6jKcKuYp1+E7H4/uQIj7C
-        5VK95x+IkdzX3M6IthRBtMsZoXa/4LirEGRJBnk9H/mzk9B4BrGpH3VnJ8m9XBt5F3ptMRQhLeYAwSPm
-        47nXu4mz2uUxDKPL9FqApMvMlQvp28BFCCPsWVpGc9S/qUFmilgexmJwfw0lCINcX7m7VmmQ1LEoLSyB
-        0FtjVd5PItRwOd/soZgxCiRHEFhUvjtDPY71P7sJWrlQsIYlDHgTIZ6VuL3Td5y5yiUIzh26znyfbAGe
-        vctmQsPce1qErO7p9Ua37q5B0HXiMJ6UNQqIBsFNgjLL+md9KhGIWD648SydEyHIXd5ykDQmQpy36upL
-        2dhPSZB1y2FrvPRWhHyzP/mFuD8Ag2YZt+N967UAAAAASUVORK5CYII=
-</value>
-  </data>
   <metadata name="tmrDCA.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>233, 17</value>
+  </metadata>
+  <metadata name="MetroToolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>920, 15</value>
   </metadata>
   <metadata name="tmrClientUpdates.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>328, 17</value>
@@ -3343,7 +3332,4 @@
         F4iB1RgAAAAASUVORK5CYII=
 </value>
   </data>
-  <metadata name="MetroToolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>920, 15</value>
-  </metadata>
 </root>

@@ -537,9 +537,10 @@ namespace BitMEX
             {
                 param["displayQty"] = "0";
             }
-
+            /*
             param["contingencyType"] = "OneTriggersTheOther";
             param["clOrdLinkID"] = Guid.NewGuid().ToString();
+            */
             param["clOrdID"] = Guid.NewGuid().ToString();
             string res = "";
             try
@@ -1636,10 +1637,13 @@ namespace BitMEX
         public string ExecInst { get; set; }
         [JsonProperty(PropertyName = "clOrdID")]
         public string ClOrdID { get; set; }
-        [JsonProperty(PropertyName = "clOrdLinkID")]
+
+        // below has just been deprecated
+        [JsonIgnore]
         public string ClOrdLinkID { get; set; }
-        [JsonProperty(PropertyName = "contingencyType")]
+        [JsonIgnore]
         public string ContingencyType { get; set; }
+
         [JsonProperty(PropertyName = "stopPx")]
         public decimal? StopPx { get; set; }
         [JsonProperty(PropertyName = "pegOffsetVale")]
