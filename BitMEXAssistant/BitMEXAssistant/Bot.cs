@@ -55,12 +55,14 @@ namespace BitMEXAssistant
         WebSocket ws_general;
         WebSocket ws_user;
 
+        private string WebProxyUrl = "";
+
         DateTime GeneralWebScocketLastMessage = new DateTime();
         DateTime UserWebScocketLastMessage = new DateTime();
         Dictionary<string, decimal> Prices = new Dictionary<string, decimal>();
         //List<Alert> Alerts = new List<Alert>();
 
-        public static string Version = "0.0.28";
+        public static string Version = "0.0.29";
 
         string LimitNowBuyOrderId = "";
         decimal LimitNowBuyOrderPrice = 0;
@@ -145,6 +147,7 @@ namespace BitMEXAssistant
 
             if (Login.APIValid)
             {
+                WebProxyUrl = Properties.Settings.Default.Proxy;
                 InitializeDropdownsAndSettings();
                 InitializeAPI();
 
@@ -276,6 +279,12 @@ namespace BitMEXAssistant
             {
                 ws_general = new WebSocket("wss://testnet.bitmex.com/realtime");
                 ws_user = new WebSocket("wss://testnet.bitmex.com/realtime");
+            }
+
+            if (!string.IsNullOrEmpty(WebProxyUrl))
+            {
+                ws_general.SetProxy(WebProxyUrl, "", "");
+                ws_user.SetProxy(WebProxyUrl, "", "");
             }
 
             GeneralWS_ReconnectTimer.Elapsed += (sender, e) =>
@@ -1379,6 +1388,7 @@ namespace BitMEXAssistant
             {
                 bitmex = new BitMEXApi(APIKey, APISecret, RealNetwork);
                 bitmex.UpdateApiRemainingHandler += UpdateAPICallsRemaining;
+                bitmex.WebProxyUrl = WebProxyUrl;
                 // Show users what network they are on.
                 UpdateNetworkAndVersion();
 

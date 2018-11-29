@@ -33,6 +33,7 @@ namespace BitMEX
         private int rateLimit;
         List<string> errors = new List<string>();
 
+        public string WebProxyUrl = "";
         public int MaxCallsLimit = 0;
         public int CallsRemaining = 0;
         public EventHandler UpdateApiRemainingHandler = null;
@@ -120,7 +121,11 @@ namespace BitMEX
 
             HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(domain + url);
             webRequest.Method = method;
-
+            if (!string.IsNullOrEmpty(WebProxyUrl))
+            {
+                WebProxy proxyObject = new WebProxy(WebProxyUrl);
+                webRequest.Proxy = proxyObject;
+            }
             if (auth)
             {
                 //string nonce = GetNonce().ToString();

@@ -922,5 +922,17 @@ namespace BitMEXAssistant.Properties {
                 this["LimitNowStopLossBuy"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Proxy {
+            get {
+                return ((string)(this["Proxy"]));
+            }
+            set {
+                this["Proxy"] = value;
+            }
+        }
     }
 }

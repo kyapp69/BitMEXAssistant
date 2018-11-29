@@ -43,6 +43,8 @@
             this.label4 = new System.Windows.Forms.Label();
             this.metroButton1 = new MetroFramework.Controls.MetroButton();
             this.metroLabel1 = new MetroFramework.Controls.MetroLabel();
+            this.tbProxy = new MetroFramework.Controls.MetroTextBox();
+            this.label3 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.metroStyleManager1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -229,6 +231,49 @@
             this.metroLabel1.Text = "This application is not affiliated with BitMEX";
             this.metroLabel1.UseStyleColors = true;
             // 
+            // tbProxy
+            // 
+            // 
+            // 
+            // 
+            this.tbProxy.CustomButton.Image = null;
+            this.tbProxy.CustomButton.Location = new System.Drawing.Point(307, 1);
+            this.tbProxy.CustomButton.Name = "";
+            this.tbProxy.CustomButton.Size = new System.Drawing.Size(21, 21);
+            this.tbProxy.CustomButton.Style = MetroFramework.MetroColorStyle.Blue;
+            this.tbProxy.CustomButton.TabIndex = 1;
+            this.tbProxy.CustomButton.Theme = MetroFramework.MetroThemeStyle.Light;
+            this.tbProxy.CustomButton.UseSelectable = true;
+            this.tbProxy.CustomButton.Visible = false;
+            this.tbProxy.Lines = new string[] {
+        "http://"};
+            this.tbProxy.Location = new System.Drawing.Point(218, 175);
+            this.tbProxy.MaxLength = 32767;
+            this.tbProxy.Name = "tbProxy";
+            this.tbProxy.PasswordChar = '\0';
+            this.tbProxy.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.tbProxy.SelectedText = "";
+            this.tbProxy.SelectionLength = 0;
+            this.tbProxy.SelectionStart = 0;
+            this.tbProxy.ShortcutsEnabled = true;
+            this.tbProxy.Size = new System.Drawing.Size(329, 23);
+            this.tbProxy.TabIndex = 15;
+            this.tbProxy.Text = "http://";
+            this.tbProxy.UseSelectable = true;
+            this.tbProxy.WaterMarkColor = System.Drawing.Color.FromArgb(((int)(((byte)(109)))), ((int)(((byte)(109)))), ((int)(((byte)(109)))));
+            this.tbProxy.WaterMarkFont = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Pixel);
+            this.tbProxy.TextChanged += new System.EventHandler(this.tbProxy_TextChanged);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.ForeColor = System.Drawing.Color.GhostWhite;
+            this.label3.Location = new System.Drawing.Point(179, 175);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(33, 13);
+            this.label3.TabIndex = 16;
+            this.label3.Text = "Proxy";
+            // 
             // APIInfo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -236,6 +281,8 @@
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(618, 225);
             this.ControlBox = false;
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.tbProxy);
             this.Controls.Add(this.metroLabel1);
             this.Controls.Add(this.metroButton1);
             this.Controls.Add(this.rbNetworkTest);
@@ -278,6 +325,8 @@
         private System.Windows.Forms.Label label4;
         private MetroFramework.Controls.MetroButton metroButton1;
         private MetroFramework.Controls.MetroLabel metroLabel1;
+        private System.Windows.Forms.Label label3;
+        private MetroFramework.Controls.MetroTextBox tbProxy;
     }
 }
 

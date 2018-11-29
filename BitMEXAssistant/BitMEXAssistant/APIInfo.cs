@@ -54,6 +54,8 @@ namespace BitMEXAssistant
                     txtSecret.Text = Properties.Settings.Default.TestAPISecret;
                     break;
             }
+            tbProxy.Text = Properties.Settings.Default.Proxy;
+
         }
 
         private void btnValidate_Click(object sender, EventArgs e)
@@ -206,6 +208,17 @@ namespace BitMEXAssistant
         {
             DialogClosed = true;
             this.Visible = false;
+        }
+
+        private void metroTextBox1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tbProxy_TextChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Proxy = tbProxy.Text.Trim();
+            SaveSettings();
         }
     }
 
