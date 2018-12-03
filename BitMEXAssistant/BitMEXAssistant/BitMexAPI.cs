@@ -1,4 +1,5 @@
 ﻿//using ServiceStack.Text;
+#define NO_PROXY // doesn't work
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -121,11 +122,13 @@ namespace BitMEX
 
             HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(domain + url);
             webRequest.Method = method;
+#if !NO_PROXY
             if (!string.IsNullOrEmpty(WebProxyUrl))
             {
                 WebProxy proxyObject = new WebProxy(WebProxyUrl);
                 webRequest.Proxy = proxyObject;
             }
+#endif
             if (auth)
             {
                 //string nonce = GetNonce().ToString();
@@ -188,9 +191,9 @@ namespace BitMEX
                 }
             }
         }
-        #endregion
+#endregion
 
-        #region Examples from BitMex
+#region Examples from BitMex
         //public List<OrderBookItem> GetOrderBook(string symbol, int depth)
         //{
         //    var param = new Dictionary<string, string>();
@@ -231,9 +234,9 @@ namespace BitMEX
         //    param["text"] = "cancel order by ID";
         //    return Query("DELETE", "/order", param, true, true);
         //}
-        #endregion
+#endregion
 
-        #region Our Calls
+#region Our Calls
 
         public List<Order> MarketClosePosition(string Symbol, string Side)
         {
@@ -270,7 +273,7 @@ namespace BitMEX
                 return new List<Order>();
             }
         }
-        #region Ordering
+#region Ordering
         public List<Order> MarketOrder(string Symbol, string Side, int Quantity, bool ReduceOnly = false)
         {
             var param = new Dictionary<string, string>();
@@ -364,7 +367,7 @@ namespace BitMEX
             }
             //return res;
         }
-
+#if false
         public List<Order> LimitOrderSafety(string Symbol, string Side, int Quantity, decimal Price, bool ReduceOnly = false, bool PostOnly = false, bool Hidden = false)
         {
 #if TRUE
@@ -517,7 +520,7 @@ namespace BitMEX
 
             return new List<Order>();
         }
-
+#endif
         public List<Order> LimitNowOrder(string Symbol, string Side, int Quantity, decimal Price, bool ReduceOnly = false, bool PostOnly = false, bool Hidden = false)
         {
             var param = new Dictionary<string, string>();
@@ -730,8 +733,8 @@ namespace BitMEX
                 TakeProfitOrder.Price = Price;
                 TakeProfitOrder.ContingencyType = "OneCancelsTheOther";
                 //TakeProfitOrder.ContingencyType = "";
-                TakeProfitOrder.OrdType = "Limit";
-                //TakeProfitOrder.OrdType = "LimitIfTouched"; // ok
+                //TakeProfitOrder.OrdType = "Limit";
+                TakeProfitOrder.OrdType = "LimitIfTouched"; // ok
                 //TakeProfitOrder.OrdType = "MarketIfTouched"; // seems not good.. if its too close can result in a loss because it triggered and then the market when against
                 if (Side == "Buy")
                 {
@@ -783,15 +786,15 @@ namespace BitMEX
                         TakeProfitOrder.StopPx = Price - TakeProfitDelta;
                     }
                     /*
-                    #if TRIGGERED_STOPS
-                    #if PRICE_TRIGGER
+#if TRIGGERED_STOPS
+#if PRICE_TRIGGER
                                         TakeProfitOrder.StopPx = Price;
-                    #else
+#else
                                         TakeProfitOrder.StopPx = Price - TickSize;
-                    #endif
-                    #else
+#endif
+#else
                                         TakeProfitOrder.StopPx = TakeProfitOrder.Price + TickSize;
-                    #endif
+#endif
                     */
                 }
                 TakeProfitOrder.OrderQty = Quantity;

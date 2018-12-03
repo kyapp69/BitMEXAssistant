@@ -2,6 +2,7 @@
 #define USE_LOCALTIME
 #define USE_L2
 #define TRIGGERED_STOPS
+#define NO_PROXY // doesn't work
 using BitMEX;
 using CsvHelper;
 using Newtonsoft.Json;
@@ -62,7 +63,7 @@ namespace BitMEXAssistant
         Dictionary<string, decimal> Prices = new Dictionary<string, decimal>();
         //List<Alert> Alerts = new List<Alert>();
 
-        public static string Version = "0.0.29";
+        public static string Version = "0.0.30";
 
         string LimitNowBuyOrderId = "";
         decimal LimitNowBuyOrderPrice = 0;
@@ -280,13 +281,13 @@ namespace BitMEXAssistant
                 ws_general = new WebSocket("wss://testnet.bitmex.com/realtime");
                 ws_user = new WebSocket("wss://testnet.bitmex.com/realtime");
             }
-
+#if !NO_PROXY
             if (!string.IsNullOrEmpty(WebProxyUrl))
             {
                 ws_general.SetProxy(WebProxyUrl, "", "");
                 ws_user.SetProxy(WebProxyUrl, "", "");
             }
-
+#endif
             GeneralWS_ReconnectTimer.Elapsed += (sender, e) =>
             {
                 ws_general.Connect();
@@ -613,6 +614,7 @@ namespace BitMEXAssistant
                             {
                                 try
                                 {
+                                    //Console.WriteLine("Orderbook Change:");
                                     OnOrderUpdate(this, EventArgs.Empty);
                                 }
                                 catch (Exception OnOrderException)
@@ -2419,7 +2421,7 @@ namespace BitMEXAssistant
                 //Console.WriteLine("Buy waited");
                 if (LimitNowBuyOrders.Count > 0)
                 {
-                    Order mainOrder = LimitNowBuyOrders.Find(x => x.ContingencyType == "OneTriggersTheOther");
+                    Order mainOrder = LimitNowBuyOrders.Find(x => x.OrdType == "Limit");
                     if (mainOrder != null && (mainOrder.OrdStatus == "" || mainOrder.OrdStatus == "New"))
                     {
                         decimal Price = LimitNowGetOrderPrice("Buy");
@@ -2443,10 +2445,19 @@ namespace BitMEXAssistant
                 //Console.WriteLine("Sell waited");
                 if (LimitNowSellOrders.Count > 0)
                 {
-                    Order mainOrder = LimitNowSellOrders.Find(x => x.ContingencyType == "OneTriggersTheOther");
+                    Order mainOrder = LimitNowSellOrders.Find(x => x.OrdType == "Limit");
+                    if (LimitNowSellOrders.Count > 0 && mainOrder == null)
+                    {
+                        //Console.WriteLine("Can't find the main order:"+LimitNowSellOrders.Count);
+                    }
+                    else
+                    {
+                        //Console.WriteLine("Checking price");
+                    }
                     if (mainOrder!=null && (mainOrder.OrdStatus=="" || mainOrder.OrdStatus == "New"))
                     {
                         decimal Price = LimitNowGetOrderPrice("Sell");
+                        //Console.WriteLine("Checking price:"+Price);
                         if (CheckOrderPrices(LimitNowSellOrders, Price))
                         {
                             Log("LimitNow Updating Sell order");
@@ -2534,7 +2545,7 @@ namespace BitMEXAssistant
                 // Start buy timer
                 if (LimitNowOrderResult.Count == 2)
                 {
-                    Order primary = LimitNowOrderResult.Where(x => !string.IsNullOrEmpty(x.ContingencyType)).FirstOrDefault();
+                    Order primary = LimitNowOrderResult.Where(x => x.OrdType == "Limit").FirstOrDefault();
                     LimitNowBuyOrderId = primary.OrderId;
                     //Console.WriteLine("Primary Buy:" + LimitNowBuyOrderId);
                     LimitNowBuyOrderPrice = Price;
@@ -2593,7 +2604,7 @@ namespace BitMEXAssistant
                 //LimitNowSellOrderPrice = Price;
                 if (LimitNowOrderResult.Count == 2)
                 {
-                    Order primary = LimitNowOrderResult.Where(x => !string.IsNullOrEmpty(x.ContingencyType)).FirstOrDefault();
+                    Order primary = LimitNowOrderResult.Where(x => x.OrdType == "Limit").FirstOrDefault();
                     LimitNowSellOrderId = primary.OrderId;
                     //Console.WriteLine("Primary Sell:" + LimitNowSellOrderId);
                     LimitNowSellOrderPrice = Price;
@@ -2667,28 +2678,28 @@ namespace BitMEXAssistant
                                                         if (LimitNowBuyOrders[i].Side == "Sell" && LimitNowBuyOrders[i].OrdType == "StopLimit")
                                                         {
                                                             LimitNowBuyOrders[i].Price = Price - ActiveInstrument.TickSize * LimitNowStopLossBuyDelta;
-                            #if TRIGGERED_STOPS
-                            #if PRICE_TRIGGER
+#if TRIGGERED_STOPS
+#if PRICE_TRIGGER
                                                             LimitNowBuyOrders[i].StopPx = Price;
-                            #else
+#else
                                                             LimitNowBuyOrders[i].StopPx = Price - ActiveInstrument.TickSize;
-                            #endif                      
-                            #else
+#endif
+#else
                                                             LimitNowBuyOrders[i].StopPx = LimitNowBuyOrders[i].Price + ActiveInstrument.TickSize;
-                            #endif                           
+#endif
                                                         }
                                                         if (LimitNowBuyOrders[i].Side == "Sell" && LimitNowBuyOrders[i].OrdType == "LimitIfTouched")
                                                         {
                                                             LimitNowBuyOrders[i].Price = Price + ActiveInstrument.TickSize * LimitNowTakeProfitBuyDelta;
-                            #if TRIGGERED_STOPS
-                            #if PRICE_TRIGGER
+#if TRIGGERED_STOPS
+#if PRICE_TRIGGER
                                                             LimitNowBuyOrders[i].StopPx = Price;
-                            #else
+#else
                                                             LimitNowBuyOrders[i].StopPx = Price + ActiveInstrument.TickSize;
-                            #endif                          
-                            #else
+#endif
+#else
                                                             LimitNowBuyOrders[i].StopPx = LimitNowBuyOrders[i].Price - ActiveInstrument.TickSize;
-                            #endif
+#endif
                                                         }
                             */
 
@@ -2791,28 +2802,28 @@ namespace BitMEXAssistant
                                                         if (LimitNowSellOrders[i].Side == "Buy" && LimitNowSellOrders[i].OrdType == "StopLimit")
                                                         {
                                                             LimitNowSellOrders[i].Price = Price + ActiveInstrument.TickSize * LimitNowStopLossSellDelta;
-                            #if TRIGGERED_STOPS
-                            #if PRICE_TRIGGER
+#if TRIGGERED_STOPS
+#if PRICE_TRIGGER
                                                             LimitNowSellOrders[i].StopPx = Price;
-                            #else
+#else
                                                             LimitNowSellOrders[i].StopPx = Price + ActiveInstrument.TickSize;
-                            #endif
-                            #else
+#endif
+#else
                                                             LimitNowSellOrders[i].StopPx = LimitNowSellOrders[i].Price - ActiveInstrument.TickSize;
-                            #endif                       
+#endif
                                                         }
                                                         if (LimitNowSellOrders[i].Side == "Buy" && LimitNowSellOrders[i].OrdType == "LimitIfTouched")
                                                         {
                                                             LimitNowSellOrders[i].Price = Price - ActiveInstrument.TickSize * LimitNowTakeProfitSellDelta;
-                            #if TRIGGERED_STOPS
-                            #if PRICE_TRIGGER
+#if TRIGGERED_STOPS
+#if PRICE_TRIGGER
                                                             LimitNowSellOrders[i].StopPx = Price;
-                            #else
+#else
                                                             LimitNowSellOrders[i].StopPx = Price - ActiveInstrument.TickSize;
-                            #endif
-                            #else
+#endif
+#else
                                                             LimitNowSellOrders[i].StopPx = LimitNowSellOrders[i].Price + ActiveInstrument.TickSize;
-                            #endif                     
+#endif
                                                         }
                             */
                         }
@@ -2901,7 +2912,7 @@ namespace BitMEXAssistant
                     //Log("Price changed:" + orders[i].Price + "=>" + price);
                     return true;
                 }
-                else if (orders[i].Price != price && orders[i].ContingencyType == "OneTriggersTheOther")
+                else if (orders[i].Price != price && orders[i].OrdType == "Limit")
                 {
                     return true;
                 }

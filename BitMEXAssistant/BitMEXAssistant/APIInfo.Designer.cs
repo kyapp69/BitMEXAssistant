@@ -260,6 +260,7 @@
             this.tbProxy.TabIndex = 15;
             this.tbProxy.Text = "http://";
             this.tbProxy.UseSelectable = true;
+            this.tbProxy.Visible = false;
             this.tbProxy.WaterMarkColor = System.Drawing.Color.FromArgb(((int)(((byte)(109)))), ((int)(((byte)(109)))), ((int)(((byte)(109)))));
             this.tbProxy.WaterMarkFont = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Pixel);
             this.tbProxy.TextChanged += new System.EventHandler(this.tbProxy_TextChanged);
@@ -273,6 +274,7 @@
             this.label3.Size = new System.Drawing.Size(33, 13);
             this.label3.TabIndex = 16;
             this.label3.Text = "Proxy";
+            this.label3.Visible = false;
             // 
             // APIInfo
             // 
